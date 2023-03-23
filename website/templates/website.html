@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Robotic Arm Control</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <h1>Robotic Arm Control</h1>
+    <form method="POST" action="/move" enctype="application/json" id="move_form">
+      <label for="base">Base</label>
+      <input type="range" min="0" max="180" step="1" name="base" id="base">
+      <br>
+      <label for="shoulder">Shoulder</label>
+      <input type="range" min="0" max="180" step="1" name="shoulder" id="shoulder">
+      <br>
+      <label for="elbow">Elbow</label>
+      <input type="range" min="0" max="180" step="1" name="elbow" id="elbow">
+      <br>
+      <label for="wrist">Wrist</label>
+      <input type="range" min="0" max="180" step="1" name="wrist" id="wrist">
+      <br>
+      <label for="gripper">Gripper</label>
+      <input type="range" min="0" max="180" step="1" name="gripper" id="gripper">
+      <br>
+      <input type="submit" value="Move">
+    </form>
+    
+    <script>
+      $(document).ready(function() {
+        $('input[type=range]').change(function() {
+          var data = {
+            'base': $('#base').val(),
+            'shoulder': $('#shoulder').val(),
+            'elbow': $('#elbow').val(),
+            'wrist': $('#wrist').val(),
+            'gripper': $('#gripper').val()
+          };
+          $.ajax({
+            type: 'POST',
+            url: '/move',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+              console.log(response);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
