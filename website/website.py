@@ -1,17 +1,25 @@
 from flask import render_template, Blueprint, request, jsonify
-from model.robot_controll import sine_smooth_servo
+from website.model.robot_controll import sine_smooth_servo, servoto_coordinates, angle_to_pulsewidth
 import pigpio
-
-website_api = Blueprint('website', __name__)
+import time
 
 pi = pigpio.pi()
+servo_pin = 12   # The GPIO pin connected to the servo
 
-base = 90
+# Set the servo pin to output mode
+website_api = Blueprint('website', __name__)
+global base
+
 shoulder = 90
 forearm = 90
 elbow = 90
 wrist = 90
 gripper = 90
+base = 0
+
+#pi.set_mode(servo_pin, pigpio.OUTPUT)
+
+#pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(base))
 
 @website_api.route('/',  methods=["GET", "POST"])
 def website():
@@ -20,12 +28,24 @@ def website():
 
 @website_api.route('/move',  methods=["POST"])
 def move():
+    global base
     data = request.get_json()  # parse JSON data from request body
-    base = data['base']
-    sine_smooth_servo(2, 1, 50, 100, base)
-    
-    # do something with data
-    print(data)
+    #pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(180))
+    sine_smooth_servo(servo_pin, base, int(data['base']))
+    base = int(data['base'])
+
     response = {'message': 'Success'}
 
     return jsonify(response)
+
+@website_api.route("/move/coordinates", methods=["POST"])
+def move_inverse_kinematics():
+    data = request.get_json()
+    print(data)
+    
+    angles = servoto_coordinates(float(data['x']), float(data['y']), float(data['z']))
+
+    response = {'message': 'Success'}
+
+    return jsonify(response)
+

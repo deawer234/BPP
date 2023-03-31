@@ -1,7 +1,11 @@
 import os
 from flask import Flask, session
 from website.website import website_api
+import sys;
 
+import os
+
+os.environ["PIGPIO_ADDR"] = "192.168.0.80"
 app = Flask(__name__)
 
 def create_app():
@@ -10,7 +14,7 @@ def create_app():
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
-
+    print(sys.path)
     app.template_folder = 'templates'
 
     app.register_blueprint(website_api)
