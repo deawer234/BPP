@@ -1,86 +1,174 @@
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')  # or Qt5Agg
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from math import pi, atan2, acos
-# Define the kinematic structure of the robot
-L1 = 120
-L2 = 88
-L3 = 145
+from matplotlib.patches import Circle
+
+def plot_top_view(z, x, base_angle, L1=120, L2=88, L3=124):
+    circle = Circle((0, 0), L1 + L2 + L3, color='gray', alpha=0.2)
+    plt.gca().add_patch(circle)
+
+    plt.plot([0, z], [0, x], marker='o', linestyle='-')
+    plt.annotate(f"Base angle: {base_angle:.2f}°", xy=(z, x), xytext=(z + 10, x + 10),
+                 arrowprops=dict(arrowstyle="->"))
+
+    plt.axis('equal')
+    plt.xlabel('Z')
+    plt.ylabel('X')
+    plt.title('Top View - Base Rotation')
 
 
-def forward_kinematics(base, shoulder, elbow, wrist):
-    # Compute the transformation matrix for the base
-    T_base = np.array([[np.cos(base), -np.sin(base), 0, 0],
-                       [np.sin(base), np.cos(base), 0, 0],
-                       [0, 0, 1, 0],
-                       [0, 0, 0, 1]])
+def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
+    base_angle = np.degrees(np.arctan2(y, x))
+    print("Base angle:", base_angle)
+
+    # Calculate the distance from the base to the target point in the XY plane
+    r = np.sqrt(x**2 + y**2)
+
+    # Project the target point into the 2D plane (perpendicular to the base rotation axis)
+    x_proj = r - (L3 * np.cos(np.radians(base_angle)))
+    y_proj = z - (L3 * np.sin(np.radians(base_angle)))
+
+    for angle in range(0, 360, 1):
+        angle_rad = np.radians(angle)
+        Wx = x_proj - (L3 * np.cos(angle_rad))
+        Wy = y_proj - (L3 * np.sin(angle_rad))
+        c2 = (Wx**2 + Wy**2 - L1**2 - L2**2) / (2 * L1 * L2)
+        if c2 < -1 or c2 > 1:
+            continue
+
+        s2 = np.negative(np.sqrt(1 - c2**2))
+
+        elbow_angle_rad = np.arctan2(s2, c2)
+        elbow_angle = np.degrees(elbow_angle_rad)
+
+        if elbow_angle < -121 or elbow_angle > 59:
+            continue
+
+        s1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wy - L2 * np.sin(elbow_angle_rad) * Wx) / (Wx**2 + Wy**2)
+        c1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wx + L2 * np.sin(elbow_angle_rad) * Wy) / (Wx**2 + Wy**2)
+
+        shoulder_angle = np.degrees(np.arctan2(s1, c1))
+
+        if shoulder_angle < -24 or shoulder_angle > 156:
+            continue
+
+        wrist_angle = angle - elbow_angle - shoulder_angle
+        if wrist_angle > 90:
+            wrist_angle = wrist_angle - 360
+
+        if wrist_angle < -90 or wrist_angle > 90:
+            continue
+        ex = L1 * np.cos(np.radians(shoulder_angle))
+        ey = L1 * np.sin(np.radians(shoulder_angle))
+
+        wx = ex + L2 * np.cos(np.radians(shoulder_angle + elbow_angle))
+        wy = ey + L2 * np.sin(np.radians(shoulder_angle + elbow_angle))
+        plt.figure()
+        plt.plot([0, ex, wx, x], [0, ey, wy, y], marker="o")
+        plt.text(x, y, f"{angle}°")
+        plt.xlim(-350, 350)
+        plt.ylim(-350, 350)
+        plt.gca().set_aspect("equal", adjustable="box")
+        break;
+
     
-    # Compute the transformation matrix for the shoulder
-    T_shoulder = np.array([[np.cos(shoulder), -np.sin(shoulder), 0, 0],
-                           [0, 0, -1, -L1],
-                           [np.sin(shoulder), np.cos(shoulder), 0, 0],
-                           [0, 0, 0, 1]])
+    plt.title("Side View")
+    circle = Circle((0, 0), 120 + 88 + 124, color='gray', alpha=0.2)
+    plt.gca().add_patch(circle)
+    plt.grid(True)
+    plt.title("Inverse Kinematics Visualization")
+    plt.figure()
+    plot_top_view(z, x, base_angle, L1, L2, L3)
+    plt.show()
+# def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
+#     r = np.sqrt(x**2 + y**2)
     
-    # Compute the transformation matrix for the elbow
-    T_elbow = np.array([[np.cos(elbow), -np.sin(elbow), 0, L2],
-                        [0, 0, 1, 0],
-                        [-np.sin(elbow), -np.cos(elbow), 0, 0],
-                        [0, 0, 0, 1]])
+#     # Calculate the position of the wrist relative to the shoulder joint
+#     Wx = r - L3
+#     Wy = y
+
+#     D = np.sqrt(Wx**2 + Wy**2)
     
-    # Compute the transformation matrix for the wrist
-    T_wrist = np.array([[np.cos(wrist), -np.sin(wrist), 0, L3],
-                        [0, 0, -1, 0],
-                        [np.sin(wrist), np.cos(wrist), 0, 0],
-                        [0, 0, 0, 1]])
-    
-    # Compute the end-effector position
-    T = T_base @ T_shoulder @ T_elbow @ T_wrist
-    end_effector_position = T[:3, 3]
-    
-    return end_effector_position
+#     # Check if the target is within reach
+#     reachable = D <= (L1 + L2)
 
-# Define the robot arm lengths
-# Define the inverse kinematics function
+#     if not reachable:
+#         raise ValueError("Target is not reachable")
+
+#     # Calculate the joint angles
+#     theta0 = np.degrees(np.arctan2(z, x))
+#     theta1 = np.degrees(np.arctan2(Wy, Wx) - np.arccos((D**2 + L1**2 - L2**2) / (2 * L1 * D)))
+#     theta2 = np.degrees(np.arccos((L1**2 + L2**2 - D**2) / (2 * L1 * L2)) - np.pi)
+#     theta3 = 180 + theta1 + theta2
+
+#     return theta0, theta1, theta2, theta3
+# Test the function
+# x, y, z = 200, 100, 0
+# L1, L2, L3 = 120, 88, 124
+# theta0, theta1, theta2, theta3 = inverse_kinematics(x, y, z, L1, L2, L3)
+# print("Joint angles (degrees):", theta0, theta1, theta2, theta3)
 
 
-# Define the inverse kinematics function
-theta1_min = 0
-theta2_min = 24 * pi / 180
-theta3_min = 59 * pi / 180
-theta4_min = -90 * pi / 180
+# import math
+# import numpy as np
 
-def inverse_kinematics(x, y, z):
-    # Calculate the base angle
-    theta1 = atan2(y, x)
+# # Arm dimensions
+# a1 = 0      # Base
+# a2 = 120    # Shoulder length
+# a3 = 88     # Elbow length
+# a4 = 124    # Wrist + Rotator + End effector combined length
 
-    # Calculate the position of the wrist
-    wrist_x = x - L3 * np.cos(theta1)
-    wrist_y = y - L3 * np.sin(theta1)
-    wrist_z = z - L1
+# def check_joint_limits(joint_angles_degrees):
+#     joint_limits_degrees = [
+#         (0, 360),  # Base rotation
+#         (24, 204),  # Shoulder
+#         (59, 239),  # Elbow
+#         (90, 270),  # Wrist
+#         (0, 360),  # Wrist rotation
+#         # No limits provided for the gripper
+#     ]
 
-    # Calculate the angle between the shoulder and the wrist
-    D = (wrist_x ** 2 + wrist_y ** 2 + wrist_z ** 2 - L2 ** 2 - L3 ** 2) / (2 * L2 * L3)
-    theta3 = acos(D)
+#     for i, (angle, limits) in enumerate(zip(joint_angles_degrees, joint_limits_degrees)):
+#         if not limits[0] <= angle <= limits[1]:
+#             print(f"Joint {i + 1} angle {angle} is out of limits {limits}")
+#             return False
+#     return True
 
-    # Calculate the angle between the ground and the shoulder-wrist line
-    alpha = atan2(wrist_z, np.sqrt(wrist_x ** 2 + wrist_y ** 2))
+# def inverse_kinematics(target_position, target_orientation):
+#     x, y, z = target_position
+#     alpha, beta, gamma = target_orientation
 
-    # Calculate the angle of the shoulder
-    theta2 = alpha + atan2(L3 * np.sin(theta3), L2 + L3 * np.cos(theta3))
+#     # Joint 1 (Base rotation)
+#     theta1 = math.atan2(y, x)
 
-    # Calculate the angle of the elbow
-    theta4 = atan2(-wrist_y*np.cos(theta1)+wrist_x*np.sin(theta1), wrist_x*np.cos(theta1)+wrist_y*np.sin(theta1))-theta2-pi
+#     # Calculate the wrist center position
+#     r = math.sqrt(x**2 + y**2)
+#     h = z - a1
 
-    # Check if the angles are within the limits
-    if (theta1 < 0 or theta1 >= 2*pi or 
-        theta2 < theta2_min or theta2 >= (180 - theta3_min) * pi / 180 or 
-        theta3 < theta3_min or theta3 >= (180 - theta2_min) * pi / 180 or
-        theta4 < theta4_min or theta4 >= 90 * pi / 180):
-        return None
+#     # Joint 2 (Shoulder) and Joint 3 (Elbow)
+#     A = a3
+#     B = a4
+#     C = math.sqrt(h**2 + (r - a2)**2)
 
-    return [theta1, theta2, theta3, theta4]
+#     # Calculate angles using the law of cosines
+#     angle_a = math.acos((B**2 + C**2 - A**2) / (2 * B * C))
+#     angle_b = math.acos((A**2 + C**2 - B**2) / (2 * A * C))
+#     angle_c = math.acos((A**2 + B**2 - C**2) / (2 * A * B))
+
+#     # Calculate the shoulder and elbow angles
+#     theta2 = math.atan2(h, r - a2) - angle_a
+#     theta3 = math.pi - angle_c
+
+#     # Calculate wrist angles (theta4, theta5, theta6) based on target orientation
+#     # Euler angles (alpha, beta, gamma) are used for simplicity
+#     theta4 = alpha - theta2 - theta3
+#     theta5 = beta
+#     theta6 = gamma
+
+#     # Convert radians to degrees
+#     joint_angles = [theta1, theta2, theta3, theta4, theta5, theta6]
+#     joint_angles_degrees = [math.degrees(angle) for angle in joint_angles]
+
+#     return joint_angles_degrees
 #sGenerate a grid of points in the workspace
 # base_range = np.linspace(-np.pi, np.pi, 25)
 # shoulder_range = np.linspace(-np.pi/2, np.pi/2, 5)
