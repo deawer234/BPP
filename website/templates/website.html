@@ -37,7 +37,13 @@
   
       <button type="button" id="submit-btn">Send Coordinates</button>
     </form>
+
+    <canvas id="map-canvas" width="500" height="500"></canvas>
+    <canvas id="z-map-canvas" width="500" height="100"></canvas>
     
+    <p>Click on the map to move the arm:</p>
+    <canvas id="canvas" width="400" height="400" style="border: 1px solid black;"></canvas>
+
     <script>
        $(document).ready(function(){
         $("#submit-btn").click(function(){
@@ -76,6 +82,74 @@
             }
           });
         });
+      });
+    </script>
+
+    <script>
+      // Get the canvas elements and set up the canvas contexts
+      const mapCanvas = document.getElementById('map-canvas');
+      const zMapCanvas = document.getElementById('z-map-canvas');
+      const mapCtx = mapCanvas.getContext('2d');
+      const zMapCtx = zMapCanvas.getContext('2d');
+
+      // Set the origin of the map canvas to the center of the canvas
+      mapCtx.translate(mapCanvas.width/2, mapCanvas.height/2);
+
+
+      // Draw the robotic arm on the map canvas
+      // Replace this with your own drawing code
+      mapCtx.beginPath();
+      mapCtx.moveTo(-50, -50);
+      mapCtx.lineTo(50, 50);
+      mapCtx.stroke();
+
+      // Add a click event listener to the map canvas
+// Add a click event listener to the map canvas
+    mapCanvas.addEventListener('click', (event) => {
+      // Get the x and y coordinates of the click relative to the center of the canvas
+      const x = event.offsetX - mapCanvas.width/2;
+      const y = -(event.offsetY - mapCanvas.height/2);
+      
+      // Clear the canvas
+      mapCtx.clearRect(-mapCanvas.width/2, -mapCanvas.height/2, mapCanvas.width, mapCanvas.height);
+      
+      // Draw the robotic arm on the map canvas
+      // Replace this with your own drawing code
+      mapCtx.beginPath();
+      mapCtx.moveTo(-50, -50);
+      mapCtx.lineTo(50, 50);
+      mapCtx.stroke();
+      
+      // Draw a cross on the map canvas at the clicked coordinates
+      mapCtx.beginPath();
+      mapCtx.moveTo(x - 5, y);
+      mapCtx.lineTo(x + 5, y);
+      mapCtx.moveTo(x, y - 5);
+      mapCtx.lineTo(x, y + 5);
+      mapCtx.stroke();
+      
+      // Display the chosen coordinates in the input fields
+      document.getElementById('x').value = x;
+      document.getElementById('y').value = y;
+    });
+      // Add a click event listener to the z map canvas
+      zMapCanvas.addEventListener('click', (event) => {
+        // Get the z coordinate of the click
+        const z = -(event.offsetY - zMapCanvas.height/2);
+        
+        // Clear the canvas
+        zMapCtx.clearRect(-zMapCanvas.width/2, -zMapCanvas.height/2, zMapCanvas.width, zMapCanvas.height);
+        
+        // Draw a cross on the z map canvas at the clicked coordinates
+        zMapCtx.beginPath();
+        zMapCtx.moveTo(-zMapCanvas.width/2, z);
+        zMapCtx.lineTo(zMapCanvas.width/2, z);
+        zMapCtx.moveTo(0, z - 5);
+        zMapCtx.lineTo(0, z + 5);
+        zMapCtx.stroke();
+        
+        // Display the chosen z coordinate in the input field
+        document.getElementById('z').value = z;
       });
     </script>
   </body>
