@@ -1,0 +1,19 @@
+CREATE DATABASE IF NOT EXISTS armDatabase;
+
+USE armDatabase;
+
+CREATE TABLE IF NOT EXISTS movement (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS position (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    movement_id INTEGER NOT NULL,
+    FOREGIN KEY (movement_id) REFERENCES movement(id),
+    shoulder INTEGER NOT NULL,
+    elbow INTEGER NOT NULL,
+    wrist INTEGER NOT NULL,
+    wrist_rot INTEGER NOT NULL,
+    gripper INTEGER NOT NULL
+);
