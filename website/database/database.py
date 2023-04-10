@@ -1,10 +1,11 @@
 import sqlite3
 from sqlite3 import Connection
-
-def get_connection(db_file: str) -> Connection:
+db_file = "./db.db"
+sql_file = "./db.sqlite"
+def get_connection() -> Connection:
     return sqlite3.connect(db_file, isolation_level=None)
 
-def create_database(db_file: str, sql_file: str):
+def create_database():
     # read the SQL code from the file
     with open(sql_file, 'r') as f:
         sql_code = f.read()

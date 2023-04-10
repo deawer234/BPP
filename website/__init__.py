@@ -2,6 +2,7 @@ import os
 from flask import Flask, session
 from website.website import website_api
 import sys;
+from website.database.database import create_database
 
 
 
@@ -16,7 +17,7 @@ def create_app():
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
-    print(sys.path)
+    create_database()
     app.template_folder = 'templates'
     app.register_blueprint(website_api)
 
