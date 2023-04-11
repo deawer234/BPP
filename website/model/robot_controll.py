@@ -58,6 +58,9 @@ def move_servo(parts, data):
         angles[part] = int(data[part])
     for _, thread in enumerate(threads):
         thread.join()
+    angles['shoulder'] = angles['shoulder'] - 24; 
+    angles['elbow'] = angles['elbow'] - 121; 
+    angles['wrist'] = angles['wrist'] - 90; 
     return True
 
 def servoto_coordinates(x, y, z):

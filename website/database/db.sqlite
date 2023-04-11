@@ -1,17 +1,21 @@
-CREATE TABLE IF NOT EXISTS movement (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+DROP TABLE IF EXISTS Movement;
+DROP TABLE IF EXISTS Position;
+
+CREATE TABLE IF NOT EXISTS Movement (
+    movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS position (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS Position (
+    position_id INTEGER PRIMARY KEY AUTOINCREMENT,
     movement_id INTEGER NOT NULL,
+    base INTEGER NOT NULL,
     shoulder INTEGER NOT NULL,
     elbow INTEGER NOT NULL,
     wrist INTEGER NOT NULL,
     wrist_rot INTEGER NOT NULL,
     gripper INTEGER NOT NULL,
     FOREIGN KEY (movement_id) 
-        REFERENCES movement (id)
+        REFERENCES Movement (movement_id)
         ON DELETE CASCADE
 );

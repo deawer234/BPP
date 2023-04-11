@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, request, jsonify, redirect
 from website.model.repositories import *
 from website.model.robot_controll import *
+from website.model.repositories import *
 import pigpio
 import time
 
@@ -18,8 +19,26 @@ global base
 
 @website_api.route('/',  methods=["GET", "POST"])
 def website():
-    toSend = get_angles()
-    return render_template("website.html", toSend = toSend)
+    tabs = get_tabs()
+    positions = {}
+    
+    for tab in tabs:
+        tmp = []
+        pos = get_positions_of_tab(tab.movement_id)
+        for position in pos:
+            data = {
+                "id": position.position_id,
+                "base": position.base,
+                "shoulder": position.shoulder,
+                "elbow": position.elbow,
+                "wrist": position.wrist,
+                "wrist_rot": position.wrist_rot,
+                "gripper": position.gripper
+            }
+            tmp.append(data)
+        positions[tab.movement_id] = tmp
+    print(positions)
+    return render_template("website.html", data = positions)
 
 @website_api.route('/move',  methods=["GET", "POST"])
 def move():

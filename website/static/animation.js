@@ -107,6 +107,12 @@ function moveArm(data) {
     success: function(response) {
       console.log(response)
       setArmRotation(response.base, response.shoulder, response.elbow, response.wrist);
+      document.getElementById("base").value = response.base;
+      document.getElementById("shoulder").value = (response.shoulder - (-24))
+      document.getElementById("elbow").value = (response.elbow -  (-121));
+      document.getElementById("wrist").value = (response.wrist - (-90));
+      document.getElementById("wrist_rot").value = response.wrist_rot;
+      document.getElementById("gripper").value = response.gripper;
     }
   });
 }

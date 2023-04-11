@@ -4,31 +4,33 @@
     <title>Robotic Arm Control</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-      body { position: relative; }
-      #viewer { width: 100vw; height: 100vh; }
-    </style>
+    <link rel="stylesheet" href="../static/style.css">
   </head>
   <body>
     <h1>Robotic Arm Control</h1>
-    <form method="POST" action="/move" enctype="application/json" id="move_form">
-      <label for="base">Base</label>
-      <input type="range" min="0" max="180" step="1" name="base" id="base">
-      <br>
-      <label for="shoulder">Shoulder</label>
-      <input type="range" min="0" max="180" step="1" name="shoulder" id="shoulder">
-      <br>
-      <label for="elbow">Elbow</label>
-      <input type="range" min="0" max="180" step="1" name="elbow" id="elbow">
-      <br>
-      <label for="wrist">Wrist</label>
-      <input type="range" min="0" max="180" step="1" name="wrist" id="wrist">
-      <br>
-      <label for="gripper">Gripper</label>
-      <input type="range" min="0" max="180" step="1" name="gripper" id="gripper">
-      <br>
-      <input type="submit" value="Move">
-    </form>
+    <div class="container">
+      <form method="POST" action="/move" enctype="application/json" id="move_form">
+        <label for="base">Base</label>
+        <input type="range" min="0" max="360" step="1" name="base" id="base">
+        <br>
+        <label for="shoulder">Shoulder</label>
+        <input type="range" min="0" max="180" step="1" name="shoulder" id="shoulder">
+        <br>
+        <label for="elbow">Elbow</label>
+        <input type="range" min="0" max="180" step="1" name="elbow" id="elbow">
+        <br>
+        <label for="wrist">Wrist</label>
+        <input type="range" min="0" max="180" step="1" name="wrist" id="wrist">
+        <br>
+        <label for="wrist_rot">Wrist rotation</label>
+        <input type="range" min="0" max="180" step="1" name="wrist_rot" id="wrist_rot">
+        <br>
+        <label for="gripper">Gripper</label>
+        <input type="range" min="0" max="180" step="1" name="gripper" id="gripper">
+        <br>
+        <input type="submit" value="Move">
+      </form>
+    </div>
 
     <form>
       <label for="x">X:</label>
@@ -42,13 +44,25 @@
   
       <button type="button" id="submit-btn">Send Coordinates</button>
     </form>
+
+
     <p> {{ message }}</p>
+
+
+
+    <div id="tabContainer">
+      <!-- Tabs will be dynamically added here -->
+    </div>
+    <button onclick="addTab()">Add Tab</button>
 
     <div id="viewer"></div>
 
 
     
     <script type="module" src="../static/animation.js"></script>
+    <script type="module">
+
+    </script>
     
   </body>
 </html>
