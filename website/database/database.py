@@ -1,4 +1,3 @@
-import urllib
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,12 +26,12 @@ session = scoped_session(sessionmaker(autocommit=False,
                                         bind=engine))
 
 
-session.execute(text('''INSERT INTO Movement (name) VALUES('tab1') '''))
-session.execute(text(''' INSERT INTO Movement (name) VALUES('tab2') '''))
+# session.execute(text('''INSERT INTO Movement (name) VALUES('tab1') '''))
+# session.execute(text(''' INSERT INTO Movement (name) VALUES('tab2') '''))
 
-session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(1, 45, 125, 50, 50, 50, 50)'''))
-session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 86, 40, 50, 50, 50, 50)'''))
-session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 12, 40, 50, 69, 50, 50)'''))
+# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(1, 45, 125, 50, 50, 50, 50)'''))
+# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 86, 40, 50, 50, 50, 50)'''))
+# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 12, 40, 50, 69, 50, 50)'''))
 Base = declarative_base()
 Base.query = session.query_property()
 

@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.css">
+    <script src="../static/node_modules/jquery/dist/jquery.js"></script>
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script type="module" src="../static/animation.js"></script>
+  </head>
+  <style>
+    .list-group-item:first-child{
+        border-radius: 0;
+    }
+    .row{
+        margin-bottom: 20px;
+    }
+
+    .tab-content{
+        max-height:300px;
+        overflow:auto;
+    }
+    .container{
+        height: 100%;
+    }
+    #top-side{
+        max-height: 50%;
+        margin-bottom: 50px;
+    }
+    #sliders{
+        width: 30%;
+    }
+    #table{
+        margin-left: 15%;
+    }
+
+    #viewer {
+    width: 40vw; height: 50vh; 
+  }
+    .form-inline .form-control{
+      width: 80%;
+      align-content: center;
+    }
+    #coords{
+      width:25%;
+    }
+    #model{
+      margin-left: 20%;
+    }
+    .hover-overlay{
+      background: hsla(195, 83%, 58%, 0.3);
+    }
+  </style>
+  <body>
+    
+    <h1>Robotic Arm Control</h1>
+    <div class="container">
+        <div class="row" id="top-side">
+            <div class="col-md-6" id="sliders">
+                <form class="form" method="POST" action="/move" enctype="application/json" id="move_form">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="base">Base</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="360" step="1" name="base" id="base" value="180" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="base_input" class="form-control input-sm">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="shoulder">Shoulder</label>
+                      <input type="range" min="-24" max="156" step="1" name="shoulder" id="shoulder" value="66" class="form-control-range">
+                    </div>
+                    <div class="form-group">
+                      <label for="elbow">Elbow</label>
+                      <input type="range" min="-121" max="59" step="1" name="elbow" id="elbow" value="-31" class="form-control-range">
+                    </div>
+                    <div class="form-group">
+                      <label for="wrist">Wrist</label>
+                      <input type="range" min="-90" max="90" step="1" name="wrist" id="wrist" value="0" class="form-control-range">
+                    </div>
+                    <div class="form-group">
+                      <label for="wrist_rot">Wrist rotation</label>
+                      <input type="range" min="0" max="180" step="1" name="wrist_rot" id="wrist_rot" value="90" class="form-control-range">
+                    </div>
+                    <div class="form-group">
+                      <label for="gripper">Gripper</label>
+                      <input type="range" min="0" max="180" step="1" name="gripper" id="gripper" value="90" class="form-control-range">
+                    </div>
+                    <input type="submit" value="Move" class="btn btn-primary">
+                    <input type="submit" value="Display position" class="btn btn-primary">
+                  </form>
+            </div>
+            <div class="col-md-6" id="table">
+                <ul class="nav nav-tabs" role="tablist" id="tabList">
+                    <!-- Tab headers will be created dynamically here -->
+                  </ul>
+            
+                <div class="tab-content" id="tabContent">
+                    <!-- Tab content will be created dynamically here -->
+                  </div>
+                    
+    
+                    <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
+                    <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
+                    <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
+                    <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
+                    <button class="btn btn-success" id="playSelectedTab">Play Motion</button>
+            </div>
+        </div>
+        <div class="row" id="bot-side">
+          <div class="col-md-6" id="coords">
+            <form class="form-inline">
+                <p>Input desired point coordinates</p>
+                <div class="form-group">
+                    <label for="x">X:</label>
+                    <input type="number" class="form-control" id="x" name="x"><br><br>
+                </div>
+                <div class="form-group">
+                  <label for="y">Y:</label>
+                  <input type="number" class="form-control" id="y" name="y"><br><br>
+                </div>
+
+                <div class="form-group">
+                  <label for="z">Z:</label>
+                  <input type="number" class="form-control" id="z" name="z"><br><br>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
+            </form>
+          </div>
+            <div class="col-md-6" id="model">
+              <span class="border">
+                <div class="viewer" id="viewer"></div>
+              </span>
+            </div>
+
+        </div>   
+    </div>
+
+
+    <div class="modal" id="nameModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Enter name of the motion:</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <input type="text" class="form-control" id="nameInput">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button id="button-save-name" type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="container2"
+
+      
+     <div> -->
+
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
+    <script type="module">
+        var data = JSON.parse('{{ data|tojson|safe }}');
+        var tabInfo = JSON.parse('{{ tabInfo|tojson|safe }}');
+        
+        function hoverRecord(event){
+          const listItem = event.target;
+          const currentHoverRecord = listItem.parentElement.querySelector('.list-group-item.hover-overlay');
+          if(currentHoverRecord)
+            currentHoverRecord.classList.remove('hover-overlay');
+          listItem.classList.add('hover-overlay');
+        }
+
+        function selectRecord(event){
+          const listItem = event.target;
+          const currentActiveRecord = listItem.parentElement.querySelector('.list-group-item.active');
+          if (currentActiveRecord){
+            if(currentActiveRecord === listItem){
+              listItem.classList.remove('active');
+              document.getElementById('deleteSelectedPosition').classList.add('disabled');
+              return;
+            }
+            currentActiveRecord.classList.remove('active');
+            
+          }
+          listItem.classList.add('active');
+          document.getElementById('deleteSelectedPosition').classList.remove('disabled');
+
+        }
+        function help(){
+            const record = document.getElementsByClassName('list-group-item active')
+            console.log(record)
+            if(record[0] != undefined)
+              record[0].classList.remove('active')
+              document.getElementById('deleteSelectedPosition').classList.add('disabled');
+        }
+
+        function createExistingTabs(tabId, positions, name){
+          const tabList = document.getElementById('tabList');
+          const tabContent = document.getElementById('tabContent');
+          // Create tab header
+          const header = document.createElement('li');
+          const headerLink = document.createElement('a');
+          headerLink.href = `tab${tabId}`;
+          headerLink.addEventListener('click', help);
+          headerLink.setAttribute('data-toggle', 'tab');
+          headerLink.setAttribute('data-target', `#tab${tabId}`); // Add the data-target attribute
+          headerLink.textContent = `${name}`;
+          header.appendChild(headerLink);
+          tabList.appendChild(header);
+
+                    // Create tab content
+          const tab = document.createElement('div');
+          tab.classList.add('tab-pane');
+          tab.id = `tab${tabId}`;
+          const list = document.createElement('ul');
+          list.classList.add('list-group');
+          positions.forEach(position => {
+              const listItem = document.createElement('li');
+              listItem.classList.add('list-group-item');
+              listItem.textContent = `Base: ${position.base}° Shoulder: ${position.shoulder + 24}° Elbow: ${position.elbow + 121}° Wrist: ${position.wrist +90}° Wrist rotation: ${position.wrist_rot}° Gripper: ${position.gripper}°`;
+              listItem.id = `${position.position_id}`;
+              listItem.addEventListener('mouseover', hoverRecord);
+              listItem.addEventListener('click', selectRecord);
+              list.appendChild(listItem);
+          });
+          tab.appendChild(list);
+          tabContent.appendChild(tab);
+
+          // Activate the first tab by default
+          if (tabList.childElementCount === 1) {
+              header.classList.add('active');
+              tab.classList.add('active');
+          }
+
+        }
+
+        function showPopUp(){
+          document.getElementById('nameInput').value = "";
+          $('#nameModal').modal('show');
+        }
+
+        function createTab(tabUUID) {
+          const name = $('#nameInput').val();
+          $('#nameModal').modal('hide');
+          const tabList = document.getElementById('tabList');
+          const tabContent = document.getElementById('tabContent');
+          
+          // Create tab header
+          const header = document.createElement('li');
+          const headerLink = document.createElement('a');
+          headerLink.href = `tab${tabUUID}`;
+          headerLink.setAttribute('data-toggle', 'tab');
+          headerLink.setAttribute('data-target', `#tab${tabUUID}`); // Add the data-target attribute
+          headerLink.textContent = `${name}`;
+          header.appendChild(headerLink);
+          tabList.appendChild(header);
+
+
+          const request = {
+              movement_id: tabUUID,
+              name: name
+            };
+          $.ajax({
+
+            type: "POST",
+            url: "/add_tab",
+            contentType: "application/json",
+            data: JSON.stringify(request),
+            success: function(response) {}
+          });
+          // Create tab content
+          const tab = document.createElement('div');
+          tab.classList.add('tab-pane');
+          tab.id = `tab${tabUUID}`;
+          const list = document.createElement('ul');
+          list.classList.add('list-group');
+          tab.appendChild(list);
+          tabContent.appendChild(tab);
+
+          // Activate the first tab by default
+          if (tabList.childElementCount === 1) {
+              header.classList.add('active');
+              tab.classList.add('active');
+          }
+        }
+
+        function addNewTab() {
+          const tabUUID = uuidv4();
+          data[tabUUID] = [];
+          createTab(tabUUID);
+        }
+
+        function addPositionToActiveTab() {
+          const activeTab = document.querySelector('.tab-pane.active');
+          if (!activeTab) return;
+          const activeTabId = activeTab.id.replace('tab', '');
+          const positionId = uuidv4();
+          const newPosition = {
+            position_id: positionId,
+            base: parseInt(document.getElementById("base").value),
+            elbow:  parseInt(document.getElementById("elbow").value),
+            gripper: parseInt(document.getElementById("gripper").value),
+            shoulder: parseInt(document.getElementById("shoulder").value),
+            wrist: parseInt(document.getElementById("wrist").value),
+            wrist_rot: parseInt(document.getElementById("wrist_rot").value),
+            movement_id: activeTabId
+          };
+
+          
+          console.log(activeTabId);
+          data[activeTabId].push(newPosition);
+          
+          const listItem = document.createElement('li');
+
+          listItem.addEventListener('mouseover', hoverRecord);
+          listItem.addEventListener('click', selectRecord);
+
+          listItem.classList.add('list-group-item');
+          listItem.id = `${newPosition.position_id}`;
+          activeTab.querySelector('ul').appendChild(listItem);
+
+          $.ajax({
+            type: "POST",
+            url: "/add_position",
+            contentType: "application/json",
+            data: JSON.stringify(newPosition),
+            success: function(response) {
+              console.log(response)
+            }
+          });
+          const string = `Base: ${newPosition.base}"° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +90}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
+          listItem.textContent = string;
+          
+          function deleteRecord(){
+            const activeTab = document.querySelector('.tab-pane.active');
+            if (!activeTab) return;
+        }
+
+        }
+
+        function deleteActiveTab() {
+          const activeHeader = document.querySelector('.nav-tabs .active');
+          const activeTab = document.querySelector('.tab-pane.active');
+          if (!activeHeader || !activeTab) return;
+
+          const activeTabId = activeTab.id.replace('tab', '');
+          delete data[activeTabId];
+
+          activeHeader.remove();
+          activeTab.remove();
+          const toRemove = activeTabId; 
+          $.ajax({
+            type: "POST",
+            url: "/remove_tab",
+            contentType: "application/json",
+            data: JSON.stringify(toRemove),
+            success: function(response) {
+              console.log(response)
+            }
+          });
+
+          // Activate the first remaining tab, if any
+          const firstHeader = document.querySelector('.nav-tabs li');
+          if (firstHeader) {
+          firstHeader.querySelector('a').click();
+          }
+        }
+
+        function deletePosition(){
+          const itemRemove = document.querySelector('.list-group-item.active');
+          const activeTab = document.querySelector('.tab-pane.active');
+
+          const activeTabId = activeTab.id.replace('tab', '');
+          for(let i = 0; data[activeTabId].length; i++){
+            if(data[activeTabId][i].position_id === itemRemove.id){
+              delete data[activeTabId][i];
+              break;
+            }
+          }
+          itemRemove.remove();
+          $.ajax({
+            type: "POST",
+            url: "/remove_pos",
+            contentType: "application/json",
+            data: JSON.stringify(itemRemove.id),
+            success: function(response) {
+              console.log(response)
+            }
+          });
+        }
+
+        // Initialize tabs with the provided data
+        for(var key in data){
+            console.log(key)
+            if (data.hasOwnProperty(key)){
+                var value=data[key];
+                createExistingTabs(key, data[key], tabInfo[key]);
+            }
+        } 
+        import { setArmRotation } from "../static/animation.js";
+
+        async function sendRequests() {
+
+          const activeTab = document.querySelector('.tab-pane.active');
+          if (!activeTab) return;
+          const activeTabId = activeTab.id.replace('tab', '');
+
+          for (const position of data[activeTabId]) {
+            console.log(position)
+            const send = {
+              "base": position.base,
+              "shoulder": position.shoulder,
+              "elbow": position.elbow,
+              "wrist": position.wrist,
+              "wrist_rot": position.wrist_rot,
+              "gripper": position.gripper
+            };
+            const response = await fetch('/play', {
+              method: 'POST',
+              body: JSON.stringify(send),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const data = await response.json();
+            setArmRotation(data.base, data.shoulder, data.elbow, data.wrist);
+          }
+        }
+        
+
+        // Add event listeners for the buttons
+        document.getElementById('addNewTabBtn').addEventListener('click', showPopUp);
+        document.getElementById('addPositionToActiveTabBtn').addEventListener('click', addPositionToActiveTab);
+        document.getElementById('deleteActiveTabBtn').addEventListener('click', deleteActiveTab);
+        document.getElementById('playSelectedTab').addEventListener('click', sendRequests);
+        document.getElementById('deleteSelectedPosition').addEventListener('click', deletePosition)
+        document.getElementById('button-save-name').addEventListener('click', addNewTab)
+    </script>
+    </body>
+</html>

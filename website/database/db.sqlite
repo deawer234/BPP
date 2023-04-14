@@ -1,14 +1,13 @@
-DROP TABLE IF EXISTS Movement;
-DROP TABLE IF EXISTS Position;
+
 
 CREATE TABLE IF NOT EXISTS Movement (
-    movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    movement_id TEXT PRIMARY KEY,
     name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Position (
-    position_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    movement_id INTEGER NOT NULL,
+    position_id TEXT PRIMARY KEY,
+    movement_id TEXT NOT NULL,
     base INTEGER NOT NULL,
     shoulder INTEGER NOT NULL,
     elbow INTEGER NOT NULL,

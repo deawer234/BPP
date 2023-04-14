@@ -3,26 +3,27 @@ from website.model.movement_model import Movement
 from website.model.position_model import Position
 
 def add_positon(tab_id, position):
-    session.add(Position(movement_id=tab_id, base=position['base'], shoulder=position['shoulder'], elbow=position['elbow'], wrist=position['wrist'], wrist_rot=position['wrist_rot'], gripper=position['gripper']))
+    session.add(Position(position_id=str(position['position_id']), base=int(position['base']), shoulder=int(position['shoulder']), elbow=int(position['elbow']), wrist=int(position['wrist']), wrist_rot=int(position['wrist_rot']), gripper=int(position['gripper']), movement_id=str(tab_id)))
     session.commit()
 
 
-def remove_position(tab_id, position_id):
-    position_to_delete = Position.query.where(Position.position_id == position_id and Position.movement_id == tab_id).first()
+def remove_position(position_id):
+    position_to_delete = Position.query.where(Position.position_id == str(position_id)).first()
     session.delete(position_to_delete)
     session.commit()
 
-def add_tab(name):
-    session.add(Movement(name=name))
+def add_tab(tab_id, name):
+    session.add(Movement(movement_id=tab_id, name=name))
     session.commit()
+
+def get_position(position_id):
+    return Position.query.where(Position.position_id == str(position_id)).first()
 
 def remove_tab(tab_id):
-    tab_to_delete = Movement.query.where(Movement.movement_id == tab_id)
+    print(tab_id)
+    tab_to_delete = Movement.query.where(Movement.movement_id == str(tab_id)).first()
     session.delete(tab_to_delete)
     session.commit()
-
-def get_tabs_with_positions():
-    return Movement.query.join(Position).where(Position.movement_id != None).all()
 
 def get_positions_of_tab(tab_id):
     return Position.query.where(Position.movement_id == tab_id).all()

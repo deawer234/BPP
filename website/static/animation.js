@@ -1,5 +1,5 @@
 
-import * as THREE from "https://unpkg.com/three@0.112/build/three.module.js";
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js';
 import { OrbitControls } from "https://unpkg.com/three@0.112/examples/jsm/controls/OrbitControls.js";
 const viewer = document.getElementById('viewer');
 const scene = new THREE.Scene();
@@ -108,14 +108,22 @@ function moveArm(data) {
       console.log(response)
       setArmRotation(response.base, response.shoulder, response.elbow, response.wrist);
       document.getElementById("base").value = response.base;
-      document.getElementById("shoulder").value = (response.shoulder - (-24))
-      document.getElementById("elbow").value = (response.elbow -  (-121));
-      document.getElementById("wrist").value = (response.wrist - (-90));
+      document.getElementById("shoulder").value = response.shoulder;
+      document.getElementById("elbow").value = response.elbow;
+      document.getElementById("wrist").value = response.wrist;
       document.getElementById("wrist_rot").value = response.wrist_rot;
       document.getElementById("gripper").value = response.gripper;
     }
   });
 }
+
+localStorage.setItem('base', document.getElementById("base").value)
+localStorage.setItem('shoulder', document.getElementById("shoulder").value)
+localStorage.setItem('elbow', document.getElementById("elbow").value)
+localStorage.setItem('wrist', document.getElementById("wrist").value)
+localStorage.setItem('wrist_rot', document.getElementById("wrist_rot").value)
+localStorage.setItem('gripper', document.getElementById("gripper").value)
+
 
 $(document).ready(function() {
   $("#submit-btn").click(function() {
@@ -133,6 +141,7 @@ $(document).ready(function() {
       'shoulder': $('#shoulder').val(),
       'elbow': $('#elbow').val(),
       'wrist': $('#wrist').val(),
+      'wrist_rot': $('#wrist_rot').val(),
       'gripper': $('#gripper').val()
     };
     moveArm(data);
