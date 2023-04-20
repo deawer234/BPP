@@ -29,70 +29,104 @@
         margin-bottom: 50px;
     }
     #sliders{
-        width: 30%;
+        width: 40%;
     }
     #table{
-        margin-left: 15%;
+        margin-left: 5%;
     }
 
     #viewer {
     width: 40vw; height: 50vh; 
   }
     .form-inline .form-control{
-      width: 80%;
+      width: 50%;
       align-content: center;
     }
-    #coords{
-      width:25%;
-    }
-    #model{
-      margin-left: 20%;
-    }
+
     .hover-overlay{
       background: hsla(195, 83%, 58%, 0.3);
+    }
+
+    .card-body .list-group{
+      max-height: 40vh;
+      overflow: auto;
     }
   </style>
   <body>
     
     <h1>Robotic Arm Control</h1>
-    <div class="container">
+    <div class="container bg-light">
         <div class="row" id="top-side">
             <div class="col-md-6" id="sliders">
-                <form class="form" method="POST" action="/move" enctype="application/json" id="move_form">
+                <form class="form" method="POST" enctype="application/json" id="move_form">
                     <div class="form-group row">
                       <div class="col-xs-2">
-                        <label for="base">Base</label>
+                      <label for="base">Base</label>
                       </div>
                       <div class="col-xs-10">
-                        <input type="range" min="0" max="360" step="1" name="base" id="base" value="180" class="form-control-range">
+                        <input type="range" min="0" max="360" step="1" name="base" id="base" value="{{ currentPos.base }}" class="form-control-range">
                       </div>
                       <div class="col-xs-4">
-                        <input type="number" id="base_input" class="form-control input-sm">
+                        <input type="number" id="base_input" class="form-control input-sm" value="{{ currentPos.base }}">
                       </div>
                     </div>
-                    <div class="form-group">
-                      <label for="shoulder">Shoulder</label>
-                      <input type="range" min="-24" max="156" step="1" name="shoulder" id="shoulder" value="66" class="form-control-range">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="shoulder">Shoulder</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="180" step="1" name="shoulder" id="shoulder" value="{{ currentPos.shoulder + 24}}" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="shoulder_input" class="form-control input-sm" value="{{ currentPos.shoulder + 24}}">
+                      </div>
                     </div>
-                    <div class="form-group">
-                      <label for="elbow">Elbow</label>
-                      <input type="range" min="-121" max="59" step="1" name="elbow" id="elbow" value="-31" class="form-control-range">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="elbow">Elbow</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="180" step="1" name="elbow" id="elbow" value="{{ currentPos.elbow + 121}}" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="elbow_input" class="form-control input-sm" value="{{ currentPos.elbow + 121}}">
+                      </div>
                     </div>
-                    <div class="form-group">
-                      <label for="wrist">Wrist</label>
-                      <input type="range" min="-90" max="90" step="1" name="wrist" id="wrist" value="0" class="form-control-range">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="wrist">Wrist</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="180" step="1" name="wrist" id="wrist" value="{{ currentPos.wrist + 90}}" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="wrist_input" class="form-control input-sm" value="{{ currentPos.wrist + 90}}">
+                      </div>
                     </div>
-                    <div class="form-group">
-                      <label for="wrist_rot">Wrist rotation</label>
-                      <input type="range" min="0" max="180" step="1" name="wrist_rot" id="wrist_rot" value="90" class="form-control-range">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="wrist_rot">Wrist rotation</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="180" step="1" name="wrist_rot" id="wrist_rot" value="{{ currentPos.wrist_rot }}" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="wrist_rot_input" class="form-control input-sm" value="{{ currentPos.wrist_rot }}">
+                      </div>
                     </div>
-                    <div class="form-group">
-                      <label for="gripper">Gripper</label>
-                      <input type="range" min="0" max="180" step="1" name="gripper" id="gripper" value="90" class="form-control-range">
+                    <div class="form-group row">
+                      <div class="col-xs-2">
+                        <label for="gripper">Gripper</label>
+                      </div>
+                      <div class="col-xs-10">
+                        <input type="range" min="0" max="180" step="1" name="gripper" id="gripper" value="{{ currentPos.gripper }}" class="form-control-range">
+                      </div>
+                      <div class="col-xs-4">
+                        <input type="number" id="gripper_input" class="form-control input-sm" value="{{ currentPos.gripper }}">
+                      </div>
                     </div>
-                    <input type="submit" value="Move" class="btn btn-primary">
-                    <input type="submit" value="Display position" class="btn btn-primary">
                   </form>
+                  <input type="submit" value="Move" class="btn btn-primary" id="move-btn">
             </div>
             <div class="col-md-6" id="table">
                 <ul class="nav nav-tabs" role="tablist" id="tabList">
@@ -108,30 +142,49 @@
                     <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
                     <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
                     <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
-                    <button class="btn btn-success" id="playSelectedTab">Play Motion</button>
+                    <button class="btn btn-success" id="playSelectedTab">Play Task</button>
+                    <button class="btn btn-success" id="automateTab">Automate Task</button>
             </div>
         </div>
         <div class="row" id="bot-side">
-          <div class="col-md-6" id="coords">
+          <div class="col-md-2" id="coords">
             <form class="form-inline">
                 <p>Input desired point coordinates</p>
                 <div class="form-group">
                     <label for="x">X:</label>
-                    <input type="number" class="form-control" id="x" name="x"><br><br>
+                    <input type="number" class="form-control" id="x" name="x" value="0"><br><br>
                 </div>
                 <div class="form-group">
                   <label for="y">Y:</label>
-                  <input type="number" class="form-control" id="y" name="y"><br><br>
+                  <input type="number" class="form-control" id="y" name="y" value="0"><br><br>
                 </div>
 
                 <div class="form-group">
                   <label for="z">Z:</label>
-                  <input type="number" class="form-control" id="z" name="z"><br><br>
+                  <input type="number" class="form-control" id="z" name="z" value="0"><br><br>
                 </div>
-
-                <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
             </form>
+            <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
+            <button type="submit" class="btn btn-primary" id="display-btn">Display Coordinates</button>
           </div>
+
+
+          <div class="col-md-4" id="events">
+            <span class="border-0">
+              <div class="card">
+                <div class="card-header">
+                  Event Log
+                </div>
+                
+                <div class="card-body">
+                  <ul class="list-group list-group-flush" id="event-log"></ul>
+                </div>
+              
+              </div>
+            </span>
+        </div>
+
+
             <div class="col-md-6" id="model">
               <span class="border">
                 <div class="viewer" id="viewer"></div>
@@ -168,6 +221,61 @@
       <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
     <script type="module">
+        var eventLog = []
+        document.cookie = ``
+
+        import { appendToEventLog } from "../static/logger.js";
+        var init = JSON.parse('{{ currentPos|tojson|safe }}')
+
+        document.getElementById("viewer").addEventListener("load", setArmRotation(init.base, init.shoulder, init.elbow, init.wrist))
+
+        const sliderBase = document.getElementById("base");
+        const inputBase = document.getElementById("base_input");
+
+        sliderBase.addEventListener("input", function() {
+          inputBase.value = sliderBase.value;
+        });
+
+        inputBase.addEventListener("input", function() {
+          sliderBase.value = inputBase.value;
+        });
+
+        const sliderShoulder = document.getElementById("shoulder");
+        const inputShoulder = document.getElementById("shoulder_input");
+
+        sliderShoulder.addEventListener("input", function() {
+          inputShoulder.value = sliderShoulder.value;
+        });
+
+        inputShoulder.addEventListener("input", function() {
+          sliderShoulder.value = inputShoulder.value;
+        });
+
+        const sliderElbow = document.getElementById("elbow");
+        const inputElbow = document.getElementById("elbow_input");
+
+        sliderElbow.addEventListener("input", function() {
+          inputElbow.value = sliderElbow.value;
+        });
+
+        inputElbow.addEventListener("input", function() {
+          sliderElbow.value = inputElbow.value;
+        });
+
+        const sliderWrist = document.getElementById("wrist");
+        const inputWrist = document.getElementById("wrist_input");
+
+        sliderWrist.addEventListener("input", function() {
+          inputWrist.value = sliderWrist.value;
+        });
+
+        inputWrist.addEventListener("input", function() {
+          sliderWrist.value = inputWrist.value;
+        });
+
+        
+
+
         var data = JSON.parse('{{ data|tojson|safe }}');
         var tabInfo = JSON.parse('{{ tabInfo|tojson|safe }}');
         
@@ -275,7 +383,9 @@
             url: "/add_tab",
             contentType: "application/json",
             data: JSON.stringify(request),
-            success: function(response) {}
+            success: function(response) {
+              appendToEventLog(`Created tab ${request.name}`)
+            }
           });
           // Create tab content
           const tab = document.createElement('div');
@@ -307,10 +417,10 @@
           const newPosition = {
             position_id: positionId,
             base: parseInt(document.getElementById("base").value),
-            elbow:  parseInt(document.getElementById("elbow").value),
+            elbow:  parseInt(document.getElementById("elbow").value) - 121,
             gripper: parseInt(document.getElementById("gripper").value),
-            shoulder: parseInt(document.getElementById("shoulder").value),
-            wrist: parseInt(document.getElementById("wrist").value),
+            shoulder: parseInt(document.getElementById("shoulder").value) - 24,
+            wrist: parseInt(document.getElementById("wrist").value) - 90,
             wrist_rot: parseInt(document.getElementById("wrist_rot").value),
             movement_id: activeTabId
           };
@@ -335,9 +445,10 @@
             data: JSON.stringify(newPosition),
             success: function(response) {
               console.log(response)
+              appendToEventLog(`Added new position to the ${activeTab.name}`)
             }
           });
-          const string = `Base: ${newPosition.base}"° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +90}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
+          const string = `Base: ${newPosition.base}° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +90}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
           listItem.textContent = string;
           
           function deleteRecord(){
@@ -365,6 +476,7 @@
             data: JSON.stringify(toRemove),
             success: function(response) {
               console.log(response)
+              
             }
           });
 
@@ -386,6 +498,7 @@
               break;
             }
           }
+          document.getElementById('deleteSelectedPosition').classList.add('disabled');
           itemRemove.remove();
           $.ajax({
             type: "POST",
@@ -396,6 +509,7 @@
               console.log(response)
             }
           });
+
         }
 
         // Initialize tabs with the provided data

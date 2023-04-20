@@ -34,7 +34,8 @@ def website():
         positions[tab.movement_id] = tmp
     print(positions)
     print(tabInfo)
-    return render_template("index.html", data = positions, tabInfo = tabInfo)
+    currentPos = get_angles()
+    return render_template("index.html", data = positions, tabInfo = tabInfo, currentPos = currentPos)
 
 @website_api.route('/move',  methods=["GET", "POST"])
 def move():
@@ -43,7 +44,7 @@ def move():
     if 'x' in data:
         if not servoto_coordinates(float(data['x']), float(data['y']), float(data['z'])):
             message = "Selected coordinates are out of work space!"
-            return render_template("website.html", message = message)
+            return jsonify(message)
     else:
         parts = get_changes(data)
         print(parts)
@@ -91,3 +92,9 @@ def play():
     move_servo(servos, data)
     time.sleep(2)
     return jsonify(get_angles())
+
+@website_api.route('/display', methods=["GET", "POST"])
+def display():
+    data = request.get_json()
+    message = get_display_of(float(data['x']), float(data['y']), float(data['z']))
+    return jsonify(message)

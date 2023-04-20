@@ -1,6 +1,8 @@
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js';
 import { OrbitControls } from "https://unpkg.com/three@0.112/examples/jsm/controls/OrbitControls.js";
+import { appendToEventLog }from "./logger.js";
+
 const viewer = document.getElementById('viewer');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, viewer.clientWidth / viewer.clientHeight, 0.1, 1000);
@@ -12,29 +14,29 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-camera.position.set(350, 350, 550);
+camera.position.set(300, 300, 450);
 camera.lookAt(scene.position);
   // Create and add X-axis grid (red)
-const xAxisGrid = new THREE.GridHelper(800, 10, 0xff0000, 0xff0000);
-xAxisGrid.rotation.x = Math.PI / 2;
-xAxisGrid.position.set(0, 0, 0);
-scene.add(xAxisGrid);
+// const xAxisGrid = new THREE.GridHelper(800, 10, 0xff0000, 0xff0000);
+// xAxisGrid.rotation.x = Math.PI / 2;
+// xAxisGrid.position.set(0, 0, 0);
+// scene.add(xAxisGrid);
 
-// Create and add Y-axis grid (green)
-const yAxisGrid = new THREE.GridHelper(800, 10, 0x00ff00, 0x00ff00);
-yAxisGrid.rotation.z = Math.PI / 2;
-yAxisGrid.position.set(0, 0, 0);
-scene.add(yAxisGrid);
+// // Create and add Y-axis grid (green)
+// const yAxisGrid = new THREE.GridHelper(800, 10, 0x00ff00, 0x00ff00);
+// yAxisGrid.rotation.z = Math.PI / 2;
+// yAxisGrid.position.set(0, 0, 0);
+// scene.add(yAxisGrid);
 
 // Create and add Z-axis grid (blue)
-const zAxisGrid = new THREE.GridHelper(800,10, 0x0000ff, 0x0000ff);
+const zAxisGrid = new THREE.GridHelper(800,10, 0xffffff, 0xffffff);
 zAxisGrid.position.set(0, 0, 0);
 scene.add(zAxisGrid);
 
-const sphereGeometry = new THREE.SphereGeometry(332, 32, 32, 0, 2* Math.PI, 0, Math.PI);
-const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.3, transparent: true });
-const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-scene.add(sphere);
+// const sphereGeometry = new THREE.SphereGeometry(332, 32, 32, 0, 2* Math.PI, 0, Math.PI);
+// const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.1, transparent: true });
+// const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+// scene.add(sphere);
 
 const axesHelper = new THREE.AxesHelper(800);
 scene.add(axesHelper);
@@ -105,25 +107,23 @@ function moveArm(data) {
     contentType: "application/json",
     data: JSON.stringify(data),
     success: function(response) {
-      console.log(response)
-      setArmRotation(response.base, response.shoulder, response.elbow, response.wrist);
-      document.getElementById("base").value = response.base;
-      document.getElementById("shoulder").value = response.shoulder;
-      document.getElementById("elbow").value = response.elbow;
-      document.getElementById("wrist").value = response.wrist;
-      document.getElementById("wrist_rot").value = response.wrist_rot;
-      document.getElementById("gripper").value = response.gripper;
+      console.log(response);
+    
+      if(typeof response === 'string')
+        appendToEventLog(response);
+      else{
+        appendToEventLog("Arm in place")
+        setArmRotation(response.base, response.shoulder, response.elbow, response.wrist);
+        document.getElementById("base").value = response.base;
+        document.getElementById("shoulder").value = (response.shoulder + 24);
+        document.getElementById("elbow").value = (response.elbow + 121);
+        document.getElementById("wrist").value = (response.wrist + 90);
+        document.getElementById("wrist_rot").value = response.wrist_rot;
+        document.getElementById("gripper").value = response.gripper;
+      }
     }
   });
 }
-
-localStorage.setItem('base', document.getElementById("base").value)
-localStorage.setItem('shoulder', document.getElementById("shoulder").value)
-localStorage.setItem('elbow', document.getElementById("elbow").value)
-localStorage.setItem('wrist', document.getElementById("wrist").value)
-localStorage.setItem('wrist_rot', document.getElementById("wrist_rot").value)
-localStorage.setItem('gripper', document.getElementById("gripper").value)
-
 
 $(document).ready(function() {
   $("#submit-btn").click(function() {
@@ -132,18 +132,58 @@ $(document).ready(function() {
       "y": $("#y").val(),
       "z": $("#z").val()
     };
+    appendToEventLog("Moving to the coordinates...")
+    moveArm(data);
+  });
+
+  $('#move-btn').click(function() {
+    var data = {
+      'base': $('#base').val(),
+      'shoulder': $('#shoulder').val() - 24,
+      'elbow': $('#elbow').val() - 121,
+      'wrist': $('#wrist').val() - 90,
+      'wrist_rot': $('#wrist_rot').val(),
+      'gripper': $('#gripper').val()
+    };
+    appendToEventLog("Moving to new angles...")
     moveArm(data);
   });
 
   $('input[type=range]').change(function() {
+
     var data = {
       'base': $('#base').val(),
-      'shoulder': $('#shoulder').val(),
-      'elbow': $('#elbow').val(),
-      'wrist': $('#wrist').val(),
+      'shoulder': $('#shoulder').val() - 24,
+      'elbow': $('#elbow').val() - 121,
+      'wrist': $('#wrist').val() - 90,
       'wrist_rot': $('#wrist_rot').val(),
       'gripper': $('#gripper').val()
     };
-    moveArm(data);
+    setArmRotation(data.base, data.shoulder, data.elbow, data.wrist);
+
+  });
+
+  $('#display-btn').click(function() {
+    var data = {
+      "x": $("#x").val(),
+      "y": $("#y").val(),
+      "z": $("#z").val()
+    };
+    appendToEventLog("Displaying selected coordinates position...")
+    $.ajax({
+      type: "POST",
+      url: "/display",
+      contentType: "application/json",
+      data: JSON.stringify(data),
+      success: function(response) {
+        console.log(response);
+        if(typeof response === 'string')
+          appendToEventLog("The position is outside of arm's workspace or is unreachable");
+        else{
+          setArmRotation(response.base, response.shoulder, response.elbow, response.wrist);
+        }
+      }
+    });
+
   });
 });

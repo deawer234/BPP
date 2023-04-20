@@ -186,7 +186,7 @@ import numpy as np
 
 # # Example usage:
 
-def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
+def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=124):
     r1 = np.sqrt(x**2 + y**2)
     
     # Calculate the base angle
@@ -194,6 +194,8 @@ def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
     print(base_angle)
 
     solutions = []
+    
+    
 
     for angle in range(0, 360, 1):
         angle_rad = np.radians(angle)
@@ -209,6 +211,7 @@ def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
 
         elbow_angle_rad = np.arctan2(s2, c2)
         elbow_angle = np.degrees(elbow_angle_rad)
+                
         if elbow_angle < -121 or elbow_angle > 59:
             continue
 
@@ -216,11 +219,13 @@ def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
         c1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wx + L2 * np.sin(elbow_angle_rad) * Wy) / (Wx**2 + Wy**2)
 
         shoulder_angle = np.degrees(np.arctan2(s1, c1))
-
+        
         if shoulder_angle < -24 or shoulder_angle > 156:
             continue
 
         wrist_angle = angle - elbow_angle - shoulder_angle
+
+        
         if wrist_angle > 90:
             wrist_angle = wrist_angle - 360
 
@@ -228,12 +233,23 @@ def inverse_kinematics(x, y, z, L1=120, L2=88, L3=124):
             continue
         
         solutions.append({'base': int(base_angle), 'shoulder': int(shoulder_angle),'elbow': int(elbow_angle),'wrist': int(wrist_angle), 'wrist_rot': 90, 'gripper': 90})
-
-    if solutions.__len__() == 0:
-        return None
     
+    total_default = 0
+    for angle in angles:
+        total_default += angles[angle]
+
+    shortest = solutions[0]
+    for i in range(solutions):
+        total = 0
+        tmp = 0
+        for angle in solutions[i]:
+            total += solutions[i][angle]
+        if total < tmp:
+            shortest = solutions[i]
+        tmp = total
+               
     #plot_arm(base_angle, shoulder_angle, elbow_angle, wrist_angle)
-    return solutions.pop(int(solutions.__len__()/2))
+    return shortest
 
 
     
