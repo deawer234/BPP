@@ -32,8 +32,6 @@ def website():
             }
             tmp.append(data)
         positions[tab.movement_id] = tmp
-    print(positions)
-    print(tabInfo)
     currentPos = get_angles()
     return render_template("index.html", data = positions, tabInfo = tabInfo, currentPos = currentPos)
 

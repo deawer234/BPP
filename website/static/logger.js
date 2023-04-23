@@ -51,7 +51,7 @@ export function appendToEventLog(message) {
 
     // Set the entry to expire in half an hour
     const expirationDate = new Date();
-    expirationDate.setMinutes(expirationDate.getMinutes() + 1);
+    expirationDate.setMinutes(expirationDate.getMinutes() + 20);
 
     const entry = {
         content: `<small class="text-muted">${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}</small><br>${message}`,

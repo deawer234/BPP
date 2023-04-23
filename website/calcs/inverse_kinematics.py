@@ -188,7 +188,7 @@ import numpy as np
 
 def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=124):
     r1 = np.sqrt(x**2 + y**2)
-    
+    z = z - 144
     # Calculate the base angle
     base_angle = np.degrees(np.arctan2(y, x))
     print(base_angle)
@@ -196,60 +196,66 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=124):
     solutions = []
     
     
+    for i in range(2):
+        for angle in range(0, 360, 1):
+            angle_rad = np.radians(angle)
 
-    for angle in range(0, 360, 1):
-        angle_rad = np.radians(angle)
+            Wx = r1 - (L3 * np.cos(angle_rad))
+            Wy = z - (L3 * np.sin(angle_rad))
 
-        Wx = r1 - (L3 * np.cos(angle_rad))
-        Wy = z - (L3 * np.sin(angle_rad))
+            c2 = (Wx**2 + Wy**2 - L1**2 - L2**2) / (2 * L1 * L2)
+            if c2 < -1 or c2 > 1:
+                continue
+            if i == 0:
+                s2 = np.negative(np.sqrt(1 - c2**2))
+            else:
+                s2 = np.sqrt(1 - c2**2)
+            elbow_angle_rad = np.arctan2(s2, c2)
+            elbow_angle = np.degrees(elbow_angle_rad)
+                    
+            if elbow_angle < -121 or elbow_angle > 59:
+                continue
 
-        c2 = (Wx**2 + Wy**2 - L1**2 - L2**2) / (2 * L1 * L2)
-        if c2 < -1 or c2 > 1:
-            continue
+            s1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wy - L2 * np.sin(elbow_angle_rad) * Wx) / (Wx**2 + Wy**2)
+            c1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wx + L2 * np.sin(elbow_angle_rad) * Wy) / (Wx**2 + Wy**2)
 
-        s2 = np.negative(np.sqrt(1 - c2**2))
+            shoulder_angle = np.degrees(np.arctan2(s1, c1))
+            
+            if shoulder_angle < -24 or shoulder_angle > 156:
+                continue
 
-        elbow_angle_rad = np.arctan2(s2, c2)
-        elbow_angle = np.degrees(elbow_angle_rad)
-                
-        if elbow_angle < -121 or elbow_angle > 59:
-            continue
+            wrist_angle = angle - elbow_angle - shoulder_angle
 
-        s1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wy - L2 * np.sin(elbow_angle_rad) * Wx) / (Wx**2 + Wy**2)
-        c1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wx + L2 * np.sin(elbow_angle_rad) * Wy) / (Wx**2 + Wy**2)
+            #print(str(wrist_angle) +"  " + str(wrist_angle - 360))
+            if wrist_angle >= 245:
+                wrist_angle = wrist_angle - 360
 
-        shoulder_angle = np.degrees(np.arctan2(s1, c1))
-        
-        if shoulder_angle < -24 or shoulder_angle > 156:
-            continue
-
-        wrist_angle = angle - elbow_angle - shoulder_angle
-
-        
-        if wrist_angle > 90:
-            wrist_angle = wrist_angle - 360
-
-        if wrist_angle < -90 or wrist_angle > 90:
-            continue
-        
-        solutions.append({'base': int(base_angle), 'shoulder': int(shoulder_angle),'elbow': int(elbow_angle),'wrist': int(wrist_angle), 'wrist_rot': 90, 'gripper': 90})
-    
+            if wrist_angle < -115 or wrist_angle > 65:
+                continue
+            
+            solutions.append({'base': int(base_angle), 'shoulder': int(shoulder_angle),'elbow': int(elbow_angle),'wrist': int(wrist_angle), 'wrist_rot': angles['wrist_rot'], 'gripper': angles['gripper']})
+        if solutions:
+            break
     total_default = 0
-    for angle in angles:
-        total_default += angles[angle]
+    
 
-    shortest = solutions[0]
-    for i in range(solutions):
-        total = 0
-        tmp = 0
-        for angle in solutions[i]:
-            total += solutions[i][angle]
-        if total < tmp:
-            shortest = solutions[i]
-        tmp = total
-               
-    #plot_arm(base_angle, shoulder_angle, elbow_angle, wrist_angle)
-    return shortest
+    if solutions:
+        for angle in angles:
+            total_default += angles[angle]
+        shortest = solutions[0]
+        for i in range(len(solutions)):
+            total = 0
+            tmp = 0
+            for angle in solutions[i]:
+                total += solutions[i][angle]
+            if total < tmp:
+                shortest = solutions[i]
+            tmp = total
+        print(shortest)
+        #plot_arm(base_angle, shoulder_angle, elbow_angle, wrist_angle)
+        return shortest
+    else:
+        return None
 
 
     

@@ -97,10 +97,10 @@
                         <label for="wrist">Wrist</label>
                       </div>
                       <div class="col-xs-10">
-                        <input type="range" min="0" max="180" step="1" name="wrist" id="wrist" value="{{ currentPos.wrist + 90}}" class="form-control-range">
+                        <input type="range" min="0" max="180" step="1" name="wrist" id="wrist" value="{{ currentPos.wrist + 115}}" class="form-control-range">
                       </div>
                       <div class="col-xs-4">
-                        <input type="number" id="wrist_input" class="form-control input-sm" value="{{ currentPos.wrist + 90}}">
+                        <input type="number" id="wrist_input" class="form-control input-sm" value="{{ currentPos.wrist + 115}}">
                       </div>
                     </div>
                     <div class="form-group row">
@@ -227,7 +227,7 @@
         import { appendToEventLog } from "../static/logger.js";
         var init = JSON.parse('{{ currentPos|tojson|safe }}')
 
-        document.getElementById("viewer").addEventListener("load", setArmRotation(init.base, init.shoulder, init.elbow, init.wrist))
+        document.getElementById("viewer").addEventListener("load", initAndAnimate(init.base, init.shoulder, init.elbow, init.wrist))
 
         const sliderBase = document.getElementById("base");
         const inputBase = document.getElementById("base_input");
@@ -334,7 +334,7 @@
           positions.forEach(position => {
               const listItem = document.createElement('li');
               listItem.classList.add('list-group-item');
-              listItem.textContent = `Base: ${position.base}° Shoulder: ${position.shoulder + 24}° Elbow: ${position.elbow + 121}° Wrist: ${position.wrist +90}° Wrist rotation: ${position.wrist_rot}° Gripper: ${position.gripper}°`;
+              listItem.textContent = `Base: ${position.base}° Shoulder: ${position.shoulder + 24}° Elbow: ${position.elbow + 121}° Wrist: ${position.wrist +115}° Wrist rotation: ${position.wrist_rot}° Gripper: ${position.gripper}°`;
               listItem.id = `${position.position_id}`;
               listItem.addEventListener('mouseover', hoverRecord);
               listItem.addEventListener('click', selectRecord);
@@ -448,7 +448,7 @@
               appendToEventLog(`Added new position to the ${activeTab.name}`)
             }
           });
-          const string = `Base: ${newPosition.base}° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +90}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
+          const string = `Base: ${newPosition.base}° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +115}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
           listItem.textContent = string;
           
           function deleteRecord(){
@@ -520,7 +520,7 @@
                 createExistingTabs(key, data[key], tabInfo[key]);
             }
         } 
-        import { setArmRotation } from "../static/animation.js";
+        import { initAndAnimate } from "../static/animation.js";
 
         async function sendRequests() {
 
