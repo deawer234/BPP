@@ -86,9 +86,10 @@ def remove_pos():
 def play():
     data = request.get_json()
     print(data)
+    delay = float(data.pop('delay')) / 1000
     servos = get_changes(data)
     move_servo(servos, data)
-    time.sleep(2)
+    time.sleep(delay)
     return jsonify(get_angles())
 
 @website_api.route('/display', methods=["GET", "POST"])

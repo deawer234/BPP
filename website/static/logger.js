@@ -4,7 +4,6 @@ var eventLogCookie = [];
 
 export function showEventLog() {
     // Retrieve the cookie value
-    console.log("here");
     const cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)array\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
     // Parse the cookie value back into an array
@@ -49,14 +48,16 @@ export function appendToEventLog(message) {
         eventLogCookie = JSON.parse(decodeURIComponent(existingCookieValue));
     }
 
-    // Set the entry to expire in half an hour
     const expirationDate = new Date();
-    expirationDate.setMinutes(expirationDate.getMinutes() + 20);
+    expirationDate.setMinutes(expirationDate.getMinutes() + 30);
 
     const entry = {
         content: `<small class="text-muted">${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}</small><br>${message}`,
         expiration: expirationDate.getTime()
     };
+
+    // document.cookie = `array=${encodeURIComponent(JSON.stringify(eventLogCookie))}; expires=${expirationDate.toUTCString()}; path=/`;
+    // console.log("New cookie value:", document.cookie);
 
     eventLogCookie.push(entry);
 
@@ -64,6 +65,7 @@ export function appendToEventLog(message) {
     const filteredEventArray = eventLogCookie.filter(entry => !isEntryExpired(entry));
     removeExpiredEntries(filteredEventArray);
 
+    document.cookie = `array=${encodeURIComponent(JSON.stringify(eventLogCookie))}; expires=Tue, 18 Apr 2023 00:30:00 UTC; path=/`;
     // Scroll to the bottom of the eventLog element
     eventLog.scrollTop = eventLog.scrollHeight;
 }

@@ -13,12 +13,9 @@
     .list-group-item:first-child{
         border-radius: 0;
     }
-    .row{
-        margin-bottom: 20px;
-    }
-
     .tab-content{
-        max-height:300px;
+        height: 300px;
+        max-height: 300px;
         overflow:auto;
     }
     .container{
@@ -28,15 +25,14 @@
         max-height: 50%;
         margin-bottom: 50px;
     }
-    #sliders{
-        width: 40%;
-    }
-    #table{
-        margin-left: 5%;
+
+    #model {
+      height: 430px;
     }
 
-    #viewer {
-    width: 40vw; height: 50vh; 
+  #viewer {
+    width: 100%; 
+     height: 100%;
   }
     .form-inline .form-control{
       width: 50%;
@@ -57,14 +53,14 @@
     <h1>Robotic Arm Control</h1>
     <div class="container bg-light">
         <div class="row" id="top-side">
-            <div class="col-md-6" id="sliders">
+            <div class="col-md-4" id="sliders">
                 <form class="form" method="POST" enctype="application/json" id="move_form">
                     <div class="form-group row">
                       <div class="col-xs-2">
                       <label for="base">Base</label>
                       </div>
                       <div class="col-xs-10">
-                        <input type="range" min="0" max="360" step="1" name="base" id="base" value="{{ currentPos.base }}" class="form-control-range">
+                        <input type="range" min="0" max="180" step="1" name="base" id="base" value="{{ currentPos.base }}" class="form-control-range">
                       </div>
                       <div class="col-xs-4">
                         <input type="number" id="base_input" class="form-control input-sm" value="{{ currentPos.base }}">
@@ -128,46 +124,34 @@
                   </form>
                   <input type="submit" value="Move" class="btn btn-primary" id="move-btn">
             </div>
-            <div class="col-md-6" id="table">
-                <ul class="nav nav-tabs" role="tablist" id="tabList">
-                    <!-- Tab headers will be created dynamically here -->
-                  </ul>
-            
-                <div class="tab-content" id="tabContent">
-                    <!-- Tab content will be created dynamically here -->
+
+            <div class="col-md-6" id="model">
+              <div class="viewer" id="viewer"></div>
+            </div>
+
+
+            <div class="col-md-2" id="coords">
+              <form class="form-inline">
+                  <p>Input desired point coordinates</p>
+                  <div class="form-group">
+                      <label for="x">X:</label>
+                      <input type="number" class="form-control" id="x" name="x" value="0"><br><br>
                   </div>
-                    
-    
-                    <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
-                    <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
-                    <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
-                    <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
-                    <button class="btn btn-success" id="playSelectedTab">Play Task</button>
-                    <button class="btn btn-success" id="automateTab">Automate Task</button>
+                  <div class="form-group">
+                    <label for="y">Y:</label>
+                    <input type="number" class="form-control" id="y" name="y" value="0"><br><br>
+                  </div>
+  
+                  <div class="form-group">
+                    <label for="z">Z:</label>
+                    <input type="number" class="form-control" id="z" name="z" value="0"><br><br>
+                  </div>
+              </form>
+              <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
+              <button type="submit" class="btn btn-primary" id="display-btn">Display Coordinates</button>
             </div>
         </div>
         <div class="row" id="bot-side">
-          <div class="col-md-2" id="coords">
-            <form class="form-inline">
-                <p>Input desired point coordinates</p>
-                <div class="form-group">
-                    <label for="x">X:</label>
-                    <input type="number" class="form-control" id="x" name="x" value="0"><br><br>
-                </div>
-                <div class="form-group">
-                  <label for="y">Y:</label>
-                  <input type="number" class="form-control" id="y" name="y" value="0"><br><br>
-                </div>
-
-                <div class="form-group">
-                  <label for="z">Z:</label>
-                  <input type="number" class="form-control" id="z" name="z" value="0"><br><br>
-                </div>
-            </form>
-            <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
-            <button type="submit" class="btn btn-primary" id="display-btn">Display Coordinates</button>
-          </div>
-
 
           <div class="col-md-4" id="events">
             <span class="border-0">
@@ -184,12 +168,25 @@
             </span>
         </div>
 
-
-            <div class="col-md-6" id="model">
-              <span class="border">
-                <div class="viewer" id="viewer"></div>
-              </span>
+        <div class="col-md-8" id="table">
+          <ul class="nav nav-tabs" role="tablist" id="tabList">
+              <!-- Tab headers will be created dynamically here -->
+            </ul>
+      
+          <div class="tab-content" id="tabContent">
+              <!-- Tab content will be created dynamically here -->
             </div>
+              
+
+            <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
+            <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
+            <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
+            <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
+            <button class="btn btn-success" id="playSelectedTab">Play Task</button>
+            <button class="btn btn-success" id="automateTab">Automate Task</button>
+      </div>
+
+
 
         </div>   
     </div>
@@ -227,7 +224,7 @@
         import { appendToEventLog } from "../static/logger.js";
         var init = JSON.parse('{{ currentPos|tojson|safe }}')
 
-        document.getElementById("viewer").addEventListener("load", initAndAnimate(init.base, init.shoulder, init.elbow, init.wrist))
+        document.getElementById("viewer").addEventListener("load", setArmRotation(init.base, init.shoulder, init.elbow, init.wrist, init.wrist_rot))
 
         const sliderBase = document.getElementById("base");
         const inputBase = document.getElementById("base_input");
@@ -273,23 +270,43 @@
           sliderWrist.value = inputWrist.value;
         });
 
+        const sliderWristrot= document.getElementById("wrist_rot");
+        const inputWristrot = document.getElementById("wrist_rot_input");
+
+        sliderWristrot.addEventListener("input", function() {
+          inputWristrot.value = sliderWristrot.value;
+        });
+
+        inputWristrot.addEventListener("input", function() {
+          sliderWristrot.value = inputWristrot.value;
+        });
+
+
         
 
 
         var data = JSON.parse('{{ data|tojson|safe }}');
         var tabInfo = JSON.parse('{{ tabInfo|tojson|safe }}');
         
-        function hoverRecord(event){
-          const listItem = event.target;
-          const currentHoverRecord = listItem.parentElement.querySelector('.list-group-item.hover-overlay');
-          if(currentHoverRecord)
+        function hoverRecord(event) {
+          const row = event.target.closest('.row');
+          const listItem = row.querySelector('.list-group-item');
+          const currentHoverRecord = row.parentElement.querySelector('.row .list-group-item.hover-overlay');
+          if (currentHoverRecord)
             currentHoverRecord.classList.remove('hover-overlay');
           listItem.classList.add('hover-overlay');
         }
 
+        function removeHoverRecord(event) {
+          const row = event.target.closest('.row');
+          const listItem = row.querySelector('.list-group-item');
+          listItem.classList.remove('hover-overlay');
+        }
+
         function selectRecord(event){
-          const listItem = event.target;
-          const currentActiveRecord = listItem.parentElement.querySelector('.list-group-item.active');
+          const row = event.target.closest('.row');
+          const listItem = row.querySelector('.list-group-item');
+          const currentActiveRecord = row.parentElement.querySelector('.row .list-group-item.active');
           if (currentActiveRecord){
             if(currentActiveRecord === listItem){
               listItem.classList.remove('active');
@@ -332,13 +349,38 @@
           const list = document.createElement('ul');
           list.classList.add('list-group');
           positions.forEach(position => {
+              const row = document.createElement('div');
+              row.classList.add('row');
+
+              const colItem = document.createElement('div');
+              colItem.classList.add('col-md-10');
+              const colInput = document.createElement('div');
+              colInput.classList.add('col-md-2');
+
               const listItem = document.createElement('li');
               listItem.classList.add('list-group-item');
-              listItem.textContent = `Base: ${position.base}° Shoulder: ${position.shoulder + 24}° Elbow: ${position.elbow + 121}° Wrist: ${position.wrist +115}° Wrist rotation: ${position.wrist_rot}° Gripper: ${position.gripper}°`;
+
+              const inputField = document.createElement('input');
+              inputField.classList.add('form-control');
+              inputField.id = `${position.position_id}IF`;
+              inputField.type = 'number';
+              inputField.value = 2000;
+              
+              
+              listItem.textContent = `Base: ${position.base}° Shoulder: ${position.shoulder + 24}° Elbow: ${position.elbow + 121}° Wrist: ${position.wrist +115}° Wrist rotation: ${position.wrist_rot}° Gripper: ${position.gripper}°\n`;
               listItem.id = `${position.position_id}`;
-              listItem.addEventListener('mouseover', hoverRecord);
-              listItem.addEventListener('click', selectRecord);
-              list.appendChild(listItem);
+              //listItem.addEventListener('mouseover', hoverRecord);
+              //listItem.addEventListener('click', selectRecord);
+              row.addEventListener('click', selectRecord)
+              row.addEventListener('mouseover', hoverRecord);
+              row.addEventListener('mouseleave', removeHoverRecord);
+
+              colItem.appendChild(listItem);
+              colInput.appendChild(inputField);
+              row.appendChild(colItem);
+              row.appendChild(colInput);
+              //listItem.appendChild(inputField);
+              list.appendChild(row);
           });
           tab.appendChild(list);
           tabContent.appendChild(tab);
@@ -420,7 +462,7 @@
             elbow:  parseInt(document.getElementById("elbow").value) - 121,
             gripper: parseInt(document.getElementById("gripper").value),
             shoulder: parseInt(document.getElementById("shoulder").value) - 24,
-            wrist: parseInt(document.getElementById("wrist").value) - 90,
+            wrist: parseInt(document.getElementById("wrist").value) - 115,
             wrist_rot: parseInt(document.getElementById("wrist_rot").value),
             movement_id: activeTabId
           };
@@ -431,12 +473,35 @@
           
           const listItem = document.createElement('li');
 
-          listItem.addEventListener('mouseover', hoverRecord);
-          listItem.addEventListener('click', selectRecord);
+          const row = document.createElement('div');
+          row.classList.add('row');
+
+          const colItem = document.createElement('div');
+          colItem.classList.add('col-md-10');
+          const colInput = document.createElement('div');
+          colInput.classList.add('col-md-2');
+
+
+          const inputField = document.createElement('input');
+          inputField.classList.add('form-control');
+          inputField.id = `${newPosition.position_id}IF`;
+          inputField.type = 'number';
+          inputField.value = 2000;
 
           listItem.classList.add('list-group-item');
           listItem.id = `${newPosition.position_id}`;
-          activeTab.querySelector('ul').appendChild(listItem);
+          const string = `Base: ${newPosition.base}° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +115}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
+          listItem.textContent = string;
+
+          row.addEventListener('click', selectRecord)
+          row.addEventListener('mouseover', hoverRecord);
+          row.addEventListener('mouseleave', removeHoverRecord);
+
+          colItem.appendChild(listItem);
+          colInput.appendChild(inputField);
+          row.appendChild(colItem);
+          row.appendChild(colInput);
+          activeTab.querySelector('ul').appendChild(row);
 
           $.ajax({
             type: "POST",
@@ -448,13 +513,6 @@
               appendToEventLog(`Added new position to the ${activeTab.name}`)
             }
           });
-          const string = `Base: ${newPosition.base}° Shoulder: ${newPosition.shoulder + 24}° Elbow: ${newPosition.elbow + 121}° Wrist: ${newPosition.wrist +115}° Wrist rotation: ${newPosition.wrist_rot}° Gripper: ${newPosition.gripper}°`;
-          listItem.textContent = string;
-          
-          function deleteRecord(){
-            const activeTab = document.querySelector('.tab-pane.active');
-            if (!activeTab) return;
-        }
 
         }
 
@@ -494,12 +552,13 @@
           const activeTabId = activeTab.id.replace('tab', '');
           for(let i = 0; data[activeTabId].length; i++){
             if(data[activeTabId][i].position_id === itemRemove.id){
-              delete data[activeTabId][i];
+              data[activeTabId].splice(i, 1)
+              //delete data[activeTabId][i];
               break;
             }
           }
           document.getElementById('deleteSelectedPosition').classList.add('disabled');
-          itemRemove.remove();
+          itemRemove.parentElement.parentElement.remove();
           $.ajax({
             type: "POST",
             url: "/remove_pos",
@@ -520,23 +579,32 @@
                 createExistingTabs(key, data[key], tabInfo[key]);
             }
         } 
-        import { initAndAnimate } from "../static/animation.js";
+        import { setArmRotation } from "../static/animation.js";
 
         async function sendRequests() {
 
           const activeTab = document.querySelector('.tab-pane.active');
           if (!activeTab) return;
           const activeTabId = activeTab.id.replace('tab', '');
-
           for (const position of data[activeTabId]) {
             console.log(position)
+            if(document.getElementById(`${position.position_id}IF`).value < 0){
+              appendToEventLog("Please use non negative delays")
+              return;
+            }
+          }
+          for (const position of data[activeTabId]) {
+            
+            let delay = document.getElementById(`${position.position_id}IF`).value
+            console.log(delay)
             const send = {
               "base": position.base,
               "shoulder": position.shoulder,
               "elbow": position.elbow,
               "wrist": position.wrist,
               "wrist_rot": position.wrist_rot,
-              "gripper": position.gripper
+              "gripper": position.gripper,
+              "delay": delay
             };
             const response = await fetch('/play', {
               method: 'POST',
@@ -546,7 +614,13 @@
               }
             });
             const data = await response.json();
-            setArmRotation(data.base, data.shoulder, data.elbow, data.wrist);
+              setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
+              document.getElementById("base").value = data.base;
+              document.getElementById("shoulder").value = (data.shoulder + 24);
+              document.getElementById("elbow").value = (data.elbow + 121);
+              document.getElementById("wrist").value = (data.wrist + 115);
+              document.getElementById("wrist_rot").value = data.wrist_rot;
+              document.getElementById("gripper").value = data.gripper;
           }
         }
         

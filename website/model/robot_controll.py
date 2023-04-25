@@ -7,23 +7,21 @@ from website.calcs.inverse_kinematics import inverse_kinematics
 from website.calcs.forward_kinematics import forward_kinematics
 
 
-pins = {'base': 18, 'shoulder': 12, 'elbow': 27, 'wrist': 22, 'wrist_rot': 23, 'gripper': 24}
-angles = {'base': 100, 'shoulder': 66, 'elbow': -31, 'wrist': -25, 'wrist_rot': 90, 'gripper': 90}
+pins = {'base': 17, 'shoulder': 12, 'elbow': 27, 'wrist': 22, 'wrist_rot': 23, 'gripper': 24}
+angles = {'base': 90, 'shoulder': 66, 'elbow': -31, 'wrist': -25, 'wrist_rot': 90, 'gripper': 90}
 
 pi = pigpio.pi()
 
 def angle_to_pulsewidth(angle):
-    return 500 + int(angle / 180 * 2000)
+    return 600 + int(angle / 180 * 1850)
 
 def pulsewidth_to_angle(pulsewidth):
     return (pulsewidth - 500)/2000 * 180
 
 def init_motors():
-    # for servo in pins:
-    #     pi.set_mode(pins[servo], pigpio.OUTPUT)
-    #     # if servo = 'base':
-    #     #     pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(180))
-    #     pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(90))
+    for servo in pins:
+        pi.set_mode(pins[servo], pigpio.OUTPUT)
+        pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(90))
     return
     
     # threads = list()
@@ -71,7 +69,7 @@ def init_motors():
 #     for position in mapped_positions:
 #         # pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
 #         time.sleep(0.02)  # Wait for the servo to move to the new position
-def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=50):
+def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=100):
     if servo_pin == pins['shoulder']:
         start_angle = start_angle + 24
         end_angle = end_angle + 24
@@ -79,8 +77,8 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=50):
         start_angle = start_angle + 121
         end_angle = end_angle + 121
     elif servo_pin == pins['wrist']:
-        start_angle = start_angle + 125
-        end_angle = end_angle + 125
+        start_angle = start_angle + 115
+        end_angle = end_angle + 115
 
     x_max = abs(end_angle - start_angle)
 
@@ -92,12 +90,36 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=50):
         
     
         mapped_positions = [(y - min(y_values)) / (x_max) * (end_angle - start_angle) + start_angle for y in y_values]
-
+    
     for position in mapped_positions:
-        # pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
+        if position > 180:
+            print(servo_pin)
+            print(position)
+        pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
         time.sleep(0.02)  # Wait for the servo to move to the new position with the adjusted delay
 
     return
+
+min_pulse = 1000
+max_pulse = 2000
+
+def set_speed(speed):
+    pulse_width = ((max_pulse - min_pulse) * (speed + 1) / 2) + min_pulse
+    pi.set_servo_pulsewidth(17, pulse_width)
+
+def rotate_angle(start_angle, end_angle, rpm):
+    angle_difference = end_angle - start_angle
+
+    speed = 1.0  # 100% speed (clockwise)
+    if angle_difference < 0:
+        speed = -1.0  # 100% speed (counterclockwise)
+        angle_difference = -angle_difference
+
+    set_speed(speed)
+    time_to_rotate = (angle_difference / 360) * (60 / rpm)
+    time.sleep(time_to_rotate)
+    set_speed(0)  # Stop the servo
+
 
 def get_changes(data):
     changes = []
@@ -108,7 +130,6 @@ def get_changes(data):
 
 def move_servo(parts, data):
     threads = list()
-    max_travel_distance = max(abs(int(data[part]) - angles[part]) for part in parts)
     for part in parts:
         x = threading.Thread(target=sine_smooth_servo, args=(pins[part], angles[part], int(data[part])))
         #sine_smooth_servo(pins[part], angles[part], int(data[part]))
@@ -117,18 +138,13 @@ def move_servo(parts, data):
         angles[part] = int(data[part])
     for _, thread in enumerate(threads):
         thread.join()
+        print(thread)
+    print(time.gmtime())
     return True
 
 def servoto_coordinates(x, y, z):
-    
     ang = inverse_kinematics(x, y, z, angles)
 
-    # max_travel_distance = max(abs(int(ang[part]) - angles[part]) for part in ang)
-    # print("max distance", max_travel_distance)
-    # print("before")
-    # print(angles)
-    # print("after")
-    # print(ang)
     if ang is not None:
         threads = list()
         tmp = ang.copy()

@@ -186,13 +186,14 @@ import numpy as np
 
 # # Example usage:
 
-def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=124):
+def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
     r1 = np.sqrt(x**2 + y**2)
-    z = z - 144
     # Calculate the base angle
     base_angle = np.degrees(np.arctan2(y, x))
     print(base_angle)
-
+    if base_angle < 0 or base_angle > 180:
+        return None
+    
     solutions = []
     
     
