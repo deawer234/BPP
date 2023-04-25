@@ -76,6 +76,8 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=100):
     elif servo_pin == pins['elbow']:
         start_angle = start_angle + 121
         end_angle = end_angle + 121
+        start_angle = 180 - start_angle
+        end_angle = 180 - end_angle
     elif servo_pin == pins['wrist']:
         start_angle = start_angle + 115
         end_angle = end_angle + 115
