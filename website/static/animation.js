@@ -195,10 +195,16 @@ function moveArm(data) {
 $(document).ready(function() {
   $("#submit-btn").click(function() {
     const z = parseFloat($("#z").val()) + 144
+    let line = false;
+    if ($('#movementSwitch').is(':checked')) {
+        line = true
+    } 
     var data = {
       "x": $("#x").val(),
       "y": $("#y").val(),
-      "z": $("#z").val()
+      "z": $("#z").val(),
+      "line": line,
+      "speed": document.getElementById("speed_input").value
     };
     appendToEventLog("Moving to the coordinates...")
     moveArm(data);
@@ -211,7 +217,8 @@ $(document).ready(function() {
       'elbow': $('#elbow').val() - 121,
       'wrist': $('#wrist').val() - 115,
       'wrist_rot': $('#wrist_rot').val(),
-      'gripper': $('#gripper').val()
+      'gripper': $('#gripper').val(),
+      "speed": document.getElementById("speed_input").value
     };
     appendToEventLog("Moving to new angles...")
     moveArm(data);
@@ -225,7 +232,8 @@ $(document).ready(function() {
       'elbow': $('#elbow').val() - 121,
       'wrist': $('#wrist').val() - 115,
       'wrist_rot': $('#wrist_rot').val(),
-      'gripper': $('#gripper').val()
+      'gripper': $('#gripper').val(),
+      "speed": document.getElementById("speed_input").value
     };
     setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
 
@@ -240,7 +248,8 @@ $(document).ready(function() {
       'elbow': $('#elbow').val() - 121,
       'wrist': $('#wrist').val() - 115,
       'wrist_rot': $('#wrist_rot').val(),
-      'gripper': $('#gripper').val()
+      'gripper': $('#gripper').val(),
+      "speed": document.getElementById("speed_input").value
     };
     setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
 
@@ -251,7 +260,8 @@ $(document).ready(function() {
     var data = {
       "x": $("#x").val(),
       "y": $("#y").val(),
-      "z": $("#z").val()
+      "z": $("#z").val(),
+      "speed": document.getElementById("speed_input").value
     };
     appendToEventLog("Displaying selected coordinates position...")
     $.ajax({
@@ -261,7 +271,7 @@ $(document).ready(function() {
       data: JSON.stringify(data),
       success: function(response) {
         console.log(response);
-        if(typeof response === 'string')
+        if(response == null)
           appendToEventLog("The position is unreachable");
         else{
           setArmRotation(response.base, response.shoulder, response.elbow, response.wrist, response.wrist_rot);

@@ -39,14 +39,15 @@ def website():
 def move():
     data = request.get_json()  # parse JSON data from request body
     print(data)
-    if 'x' in data:
-        if not servoto_coordinates(float(data['x']), float(data['y']), float(data['z'])):
-            message = "Selected coordinates are out of work space!"
-            return jsonify(message)
+    if 'line' in data:
+        if data['line']:
+            if not servoto_coordinates_line(float(data['x']), float(data['y']), float(data['z']), float(data['speed'])):
+                return jsonify("Selected coordinates are out of reach")
+        else:
+            if not servoto_coordinates(float(data['x']), float(data['y']), float(data['z']), float(data['speed'])):
+                return jsonify("Selected coordinates are out of reach")
     else:
-        parts = get_changes(data)
-        print(parts)
-        move_servo(parts, data)
+        move_servo(data)
     toSend = get_angles()
     return jsonify(toSend)  # return angles as JSON
 
@@ -87,8 +88,7 @@ def play():
     data = request.get_json()
     print(data)
     delay = float(data.pop('delay')) / 1000
-    servos = get_changes(data)
-    move_servo(servos, data)
+    move_servo(data)
     time.sleep(delay)
     return jsonify(get_angles())
 

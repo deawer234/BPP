@@ -19,57 +19,12 @@ def pulsewidth_to_angle(pulsewidth):
     return (pulsewidth - 500)/2000 * 180
 
 def init_motors():
-    for servo in pins:
-        pi.set_mode(pins[servo], pigpio.OUTPUT)
-        pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(90))
+    #for servo in pins:
+        #pi.set_mode(pins[servo], pigpio.OUTPUT)
+        #pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(90))
     return
-    
-    # threads = list()
-    # start = get_current_angles()
-    # for servo in pins:
-    #     x = threading.Thread(target=sine_smooth_servo, args=(pins[servo], start[servo], angles[servo]))
-    #     #sine_smooth_servo(pins[part], angles[part], int(data[part]))
-    #     threads.append(x)
-    #     x.start()
-    # for _, thread in enumerate(threads):
-    #     thread.join()
 
-# def sine_smooth_servo(servo_pin, start_angle, end_angle):
-
-#     # Calculate the range of motion and the maximum x value
-#     if servo_pin == pins['shoulder']:
-#         start_angle = start_angle + 24
-#         end_angle = end_angle + 24
-#     elif servo_pin == pins['elbow']:
-#         start_angle = start_angle + 121
-#         end_angle = end_angle + 121
-#     elif servo_pin == pins['wrist']:
-#         start_angle = start_angle + 90
-#         end_angle = end_angle + 90
-
-#     x_max = abs(end_angle - start_angle)
-#     # Generate the y-values using the sine function
-#     if(start_angle < end_angle):
-#         y_values = [x_max/2 * math.sin((( math.pi * (x - start_angle)) / ( x_max)) - 0.5 * math.pi) + x_max/2 for x in range(start_angle, end_angle)]
-#     else:
-#         y_values = [x_max/2 * math.sin((( math.pi * (start_angle - x)) / (x_max)) - 0.5 * math.pi) + x_max/2 for x in range(end_angle, start_angle)]
-#         y_values.reverse()
-#     print(y_values)
-#     # Map the y values to the appropriate servo positions
-#     mapped_positions=[]
-#     if y_values:
-#         y_min = min(y_values)
-#         y_max = max(y_values)
-        
-#         if y_max == y_min and y_max != 0:
-#             mapped_positions = [end_angle]
-#         else:
-#             mapped_positions = [(y - y_min) / (x_max) * (end_angle - start_angle) + start_angle for y in y_values]
-#         # Move the servo to the mapped positions
-#     for position in mapped_positions:
-#         # pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
-#         time.sleep(0.02)  # Wait for the servo to move to the new position
-def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=100):
+def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps):
     if servo_pin == pins['shoulder']:
         start_angle = start_angle + 24
         end_angle = end_angle + 24
@@ -85,7 +40,9 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=100):
     x_max = abs(end_angle - start_angle)
 
     # Generate an array with equal steps between start_angle and end_angle
-    x_values = np.linspace(start_angle, end_angle, num=num_steps)
+
+    x_values = np.linspace(int(start_angle), int(end_angle), int(num_steps))
+
     mapped_positions = []
     if x_max != 0:
         y_values = [x_max/2 * math.sin((( math.pi * (x - start_angle)) / ( x_max)) - 0.5 * math.pi) + x_max/2 for x in x_values]
@@ -94,34 +51,10 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps=100):
         mapped_positions = [(y - min(y_values)) / (x_max) * (end_angle - start_angle) + start_angle for y in y_values]
     
     for position in mapped_positions:
-        if position > 180:
-            print(servo_pin)
-            print(position)
-        pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
+        #pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
         time.sleep(0.02)  # Wait for the servo to move to the new position with the adjusted delay
 
     return
-
-min_pulse = 1000
-max_pulse = 2000
-
-def set_speed(speed):
-    pulse_width = ((max_pulse - min_pulse) * (speed + 1) / 2) + min_pulse
-    pi.set_servo_pulsewidth(17, pulse_width)
-
-def rotate_angle(start_angle, end_angle, rpm):
-    angle_difference = end_angle - start_angle
-
-    speed = 1.0  # 100% speed (clockwise)
-    if angle_difference < 0:
-        speed = -1.0  # 100% speed (counterclockwise)
-        angle_difference = -angle_difference
-
-    set_speed(speed)
-    time_to_rotate = (angle_difference / 360) * (60 / rpm)
-    time.sleep(time_to_rotate)
-    set_speed(0)  # Stop the servo
-
 
 def get_changes(data):
     changes = []
@@ -130,10 +63,20 @@ def get_changes(data):
             changes.append(part)
     return changes
 
-def move_servo(parts, data):
+def move_servo(data):
     threads = list()
+    print(data)
+    setSpeed = float(data.pop('speed'))
+    parts = get_changes(data)
+    speed = []
+    num_samples=0
     for part in parts:
-        x = threading.Thread(target=sine_smooth_servo, args=(pins[part], angles[part], int(data[part])))
+        speed.append(np.abs(angles[part]-int(data[part])))
+    if speed:
+        num_samples = max(speed)
+        num_samples = num_samples / setSpeed
+    for part in parts:
+        x = threading.Thread(target=sine_smooth_servo, args=(pins[part], angles[part], int(data[part]), num_samples))
         #sine_smooth_servo(pins[part], angles[part], int(data[part]))
         threads.append(x)
         x.start()
@@ -144,14 +87,21 @@ def move_servo(parts, data):
     print(time.gmtime())
     return True
 
-def servoto_coordinates(x, y, z):
+def servoto_coordinates(x, y, z, setSpeed):
     ang = inverse_kinematics(x, y, z, angles)
-
+    parts = get_changes(ang)
+    speed = []
+    num_samples=0
+    for part in parts:
+        speed.append(np.abs(angles[part]-int(ang[part])))
+    if speed:
+        num_samples = max(speed)
+        num_samples = num_samples / setSpeed
     if ang is not None:
         threads = list()
         tmp = ang.copy()
         for servo in pins:
-            x = threading.Thread(target=sine_smooth_servo, args=(pins[servo], angles[servo], ang[servo]))
+            x = threading.Thread(target=sine_smooth_servo, args=(pins[servo], angles[servo], ang[servo], num_samples))
             threads.append(x)
             x.start()
             angles[servo] = tmp[servo]
@@ -161,39 +111,76 @@ def servoto_coordinates(x, y, z):
         return False
     return True
 
-# LINE MOVEMENT
-# def servoto_coordinates(x, y, z):
-#     if inverse_kinematics(x, y, z, angles) is None:
-#         return False
+def linear_interpolation(p_start, p_end, n_steps):
+    return np.array([p_start + (i/n_steps) * (p_end - p_start) for i in range(n_steps+1)])
+
+#LINE MOVEMENT
+barrier = threading.Barrier(6)
+def servoto_coordinates_line(x, y, z, speed):
+    # ang = inverse_kinematics(x, y, z, angles)
+    # if ang is None:
+    #     return False
+    start_point = forward_kinematics(np.radians(angles['base']), np.radians(angles['shoulder']), np.radians(angles['elbow']), np.radians(angles['wrist']))
+    points = linear_interpolation(np.array([x, y, z]), start_point, 100 / speed)
+    points = points[::-1]
+    # Calculate joint angles for each point
+    joint_angles = []
+    for p in points:
+        if joint_angles and joint_angles is not None:
+            print(joint_angles[-1])
+            print(p[0], p[1], p[2])
+            joint_angles.append(inverse_kinematics(p[0], p[1], p[2], joint_angles[-1]))
+        else:
+            joint_angles.append(inverse_kinematics(p[0], p[1], p[2], angles))
+    # joint_angles = [inverse_kinematics(p[0], p[1], p[2], angles) for p in points]   
+    # tmp = joint_angles[-1]
+    # Move the robotic arm through the joint angle configurations
     
-#     start_point = forward_kinematics(np.radians(angles['base']), np.radians(angles['shoulder']), np.radians(angles['elbow']), np.radians(angles['wrist']))
-#     print(start_point)
-#     p1 = np.array([start_point['x'], start_point['y'], start_point['z']])
-#     p2 = np.array([x, y, z])
-#     points = interpolate_points(p1, p2)
-#     print(points)
-#     for point in range(len(points)):
-#         print(points[point][0])
+    
+    
+    # print(start_point)
+    # p1 = np.array([start_point['x'], start_point['y'], start_point['z']])
+    # p2 = np.array([x, y, z])
+    # points = interpolate_points(p1, p2)
+    # print(points)
+    # for point in range(len(points)):
+        # parts = get_changes(angl)
+        # speed = []
+        # num_samples = 0;
+        # for part in parts:
+        #     speed.append(np.abs(angles[part]-int(angl[part])))
+        # if speed:
+        #     num_samples = max(speed)
+    
+    threads = list()
+    for servo in pins:
+        x = threading.Thread(target=lol, args=(servo, joint_angles))
+        threads.append(x)
+        x.start()
+        angles[servo] = joint_angles[-1][servo]
+    for i, thread in enumerate(threads):
+        thread.join()
+    #print(angles)
+    return True
+
+def lol(servo, angl):
+    for i in range(len(angl)):
+        # if i != 0 and (angl[i][servo] > (angl[i-1][servo] + 5) or angl[i][servo] + 5 < (angl[i-1][servo])):
+        #     sine_smooth_servo(pins[servo], angl[i-1][servo], angl[i][servo], int(np.abs((np.abs(angl[i][servo]) - np.abs(angl[i-1][servo])))));
+        #     continue
+        if servo == 'shoulder':
+            angl[i][servo] = angl[i][servo] + 24
+        elif servo == 'elbow':
+            angl[i][servo] = angl[i][servo]  + 121
+            angl[i][servo] = 180 - angl[i][servo] 
+        elif servo =='wrist':
+            angl[i][servo] = angl[i][servo]  + 115
         
-#         ang = inverse_kinematics(points[point][0], points[point][1], points[point][2], angles)
-
-#         # max_travel_distance = max(abs(int(ang[part]) - angles[part]) for part in ang)
-#         # print("max distance", max_travel_distance)
-#         # print("before")
-#         # print(angles)
-#         # print("after")
-#         # print(ang)
-#         threads = list()
-#         tmp = ang.copy()
-#         for servo in pins:
-#             x = threading.Thread(target=sine_smooth_servo, args=(pins[servo], angles[servo], ang[servo]))
-#             threads.append(x)
-#             x.start()
-#             angles[servo] = tmp[servo]
-#         for i, thread in enumerate(threads):
-#             thread.join()
-
-#     return True
+        
+        pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(angl[i][servo]))
+        time.sleep(0.02)
+        barrier.wait()
+    return 
 
 # Get current angles of the arm
 def get_angles():
@@ -204,12 +191,5 @@ def get_display_of(x, y, z):
     return inverse_kinematics(x, y, z, angles)
 
 
-# For line movement function
-def interpolate_points(p1, p2, num_points=10):
-    points = []
-    for t in np.linspace(0, 1, num_points + 2):  # Excludes the start and end points
-        interpolated_point = p1 * (1 - t) + p2 * t
-        points.append(interpolated_point)
-    return points
 
 

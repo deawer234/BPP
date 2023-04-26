@@ -4,8 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo</title>
-    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.css">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="../static/node_modules/jquery/dist/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/js/bootstrap-switch.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js" data-turbolinks-track="true"></script>
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
+        rel="stylesheet" type="text/css" />
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/css/bootstrap3/bootstrap-switch.css"
+        rel="stylesheet" type="text/css" />
+    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.css">
+    
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script type="module" src="../static/animation.js"></script>
   </head>
@@ -46,6 +58,10 @@
     .card-body .list-group{
       max-height: 40vh;
       overflow: auto;
+    }
+
+    .tab-pane{
+      border: 1px;
     }
   </style>
   <body>
@@ -123,35 +139,78 @@
                     </div>
                   </form>
                   <input type="submit" value="Move" class="btn btn-primary" id="move-btn">
+
+                  <label for="speed">Speed</label>
+                  <input type="range" min="2" max="8" step="1" name="speed" id="speed" value="4" class="form-control-range">
+                  <input type="number" id="speed_input" class="form-control input-sm" value="1" readonly>
             </div>
 
-            <div class="col-md-6" id="model">
-              <div class="viewer" id="viewer"></div>
-            </div>
+            <div class="col-md-8" id="table">
+              <ul class="nav nav-tabs" role="tablist" id="tabList">
+                  <!-- Tab headers will be created dynamically here -->
+                </ul>
+                
+              <div class="tab-content border border-dark" id="tabContent">
+                  <!-- Tab content will be created dynamically here -->
+                </div>
+              
+                  
+                <div class="btn-group">
+                  <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
+                  <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
+                  <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
+                  <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
+                  <button class="btn btn-success" id="playSelectedTab">Play Task</button>
+              </div>
+              <div class="btn-group">
+                <button id="pauseButton" class="btn btn-warning disabled">Pause</button>
+                <button id="continueButton" class="btn btn-primary disabled">Resume</button>
+                <button id="stopButton" class="btn btn-danger disabled">Stop</button>
+    
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="automate">
+                <label class="form-check-label" for="automate">Automate task</label>
+              </div>
+    
+          </div>
+    
 
 
-            <div class="col-md-2" id="coords">
-              <form class="form-inline">
-                  <p>Input desired point coordinates</p>
-                  <div class="form-group">
-                      <label for="x">X:</label>
-                      <input type="number" class="form-control" id="x" name="x" value="0"><br><br>
-                  </div>
-                  <div class="form-group">
-                    <label for="y">Y:</label>
-                    <input type="number" class="form-control" id="y" name="y" value="0"><br><br>
-                  </div>
-  
-                  <div class="form-group">
-                    <label for="z">Z:</label>
-                    <input type="number" class="form-control" id="z" name="z" value="0"><br><br>
-                  </div>
-              </form>
-              <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
-              <button type="submit" class="btn btn-primary" id="display-btn">Display Coordinates</button>
-            </div>
         </div>
         <div class="row" id="bot-side">
+          <div class="col-md-6" id="model">
+            <div class="viewer" id="viewer"></div>
+          </div>
+
+
+          <div class="col-md-2" id="coords">
+            <form class="form-inline">
+                <p>Input desired point coordinates</p>
+                <div class="form-group">
+                    <label for="x">X:</label>
+                    <input type="number" class="form-control" id="x" name="x" value="0"><br><br>
+                </div>
+                <div class="form-group">
+                  <label for="y">Y:</label>
+                  <input type="number" class="form-control" id="y" name="y" value="0"><br><br>
+                </div>
+
+                <div class="form-group">
+                  <label for="z">Z:</label>
+                  <input type="number" class="form-control" id="z" name="z" value="0"><br><br>
+                </div>
+            </form>
+            <div class="btn-group-vertical">
+              <button type="submit" class="btn btn-primary" id="submit-btn">Send Coordinates</button>
+              <button type="submit" class="btn btn-primary" id="display-btn">Display Coordinates</button>
+
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="movementSwitch">
+              <label class="form-check-label" for="movementSwitch">Line movement</label>
+            </div>
+          </div>
 
           <div class="col-md-4" id="events">
             <span class="border-0">
@@ -159,32 +218,12 @@
                 <div class="card-header">
                   Event Log
                 </div>
-                
-                <div class="card-body">
-                  <ul class="list-group list-group-flush" id="event-log"></ul>
-                </div>
-              
+                  <div class="card-body border border-dark">
+                    <ul class="list-group list-group-flush" id="event-log"></ul>
+                  </div>
               </div>
             </span>
         </div>
-
-        <div class="col-md-8" id="table">
-          <ul class="nav nav-tabs" role="tablist" id="tabList">
-              <!-- Tab headers will be created dynamically here -->
-            </ul>
-      
-          <div class="tab-content" id="tabContent">
-              <!-- Tab content will be created dynamically here -->
-            </div>
-              
-
-            <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
-            <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
-            <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
-            <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
-            <button class="btn btn-success" id="playSelectedTab">Play Task</button>
-            <button class="btn btn-success" id="automateTab">Automate Task</button>
-      </div>
 
 
 
@@ -218,6 +257,24 @@
       <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
     <script type="module">
+      
+        $(document).ready(function () {
+          $('#movementSwitch').bootstrapSwitch();
+          $('#automate').bootstrapSwitch();
+        });
+
+        $('#movementSwitch').on('switchChange.bootstrapSwitch', function(event, state) {
+            if (state == true) {
+                // The switch is on, perform other actions here
+              document.getElementById("speed").disabled = true;
+              document.getElementById("speed_input").value = 1;
+              document.getElementById("speed").value = 4;
+            } else {
+                // The switch is off
+                document.getElementById("speed").disabled = false;
+            }
+        });
+
         var eventLog = []
         document.cookie = ``
 
@@ -262,12 +319,13 @@
         const sliderWrist = document.getElementById("wrist");
         const inputWrist = document.getElementById("wrist_input");
 
-        sliderWrist.addEventListener("input", function() {
-          inputWrist.value = sliderWrist.value;
+
+        $('#wrist').on("input", "change", function(){
+          $('#wrist_input').value = $('#wrist').val();
         });
 
-        inputWrist.addEventListener("input", function() {
-          sliderWrist.value = inputWrist.value;
+        $('#wrist_input').on("input", "change", function() {
+          $('#wrist').value = $('#wrist_input').val();
         });
 
         const sliderWristrot= document.getElementById("wrist_rot");
@@ -280,6 +338,27 @@
         inputWristrot.addEventListener("input", function() {
           sliderWristrot.value = inputWristrot.value;
         });
+
+
+        const sliderGripper = document.getElementById("gripper");
+        const inputGripper = document.getElementById("gripper_input");
+
+        sliderGripper.addEventListener("input", function() {
+          inputGripper.value = sliderGripper.value;
+        });
+
+        inputGripper.addEventListener("input", function() {
+          sliderGripper.value = inputGripper.value;
+        });
+
+        
+        const sliderSpeed = document.getElementById("speed");
+        const inputSpeed = document.getElementById("speed_input");
+
+        sliderSpeed.addEventListener("input", function() {
+          inputSpeed.value = sliderSpeed.value/4;
+        });
+
 
 
         
@@ -581,9 +660,66 @@
         } 
         import { setArmRotation } from "../static/animation.js";
 
+        let pause = false;
+        let stopped = false;
+        let automate = false;
+
+                // Add event listeners to enable/disable the buttons when needed
+          document.getElementById('playSelectedTab').addEventListener('click', () => {
+          document.getElementById('pauseButton').classList.remove('disabled')
+          document.getElementById('stopButton').classList.remove('disabled')
+          document.getElementById("continueButton").classList.add('disabled')
+        });
+        // Pause button event listener
+        document.getElementById('pauseButton').addEventListener('click', () => {
+          pause = true;
+          document.getElementById('continueButton').classList.remove('disabled')
+          document.getElementById('pauseButton').classList.add('disabled')
+        });
+
+        // Continue button event listener
+        document.getElementById('continueButton').addEventListener('click', () => {
+          pause = false;
+          document.getElementById('pauseButton').classList.remove('disabled')
+          document.getElementById('continueButton').classList.add('disabled')
+        });
+
+        // Stop button event listener
+        document.getElementById('stopButton').addEventListener('click', () => {
+          pause = false;
+          stopped = true;
+          document.getElementById('pauseButton').classList.add('disabled')
+          document.getElementById('continueButton').classList.add('disabled')
+          document.getElementById('addNewTabBtn').classList.remove('disabled');
+          document.getElementById('addPositionToActiveTabBtn').classList.remove('disabled');
+          document.getElementById('deleteActiveTabBtn').classList.remove('disabled');
+          document.getElementById('playSelectedTab').classList.remove('disabled');
+          document.getElementById('deleteSelectedPosition').classList.remove('disabled');
+          document.getElementById('button-save-name').classList.remove('disabled');
+          document.getElementById('stopButton').classList.add('disabled');
+        });
+
+
+
+
         async function sendRequests() {
+          if ($('#automate').is(':checked')) {
+            automate = true;
+          } else{
+            automate = false;
+          }
+          document.getElementById('addNewTabBtn').classList.add('disabled');
+          document.getElementById('addPositionToActiveTabBtn').classList.add('disabled');
+          document.getElementById('deleteActiveTabBtn').classList.add('disabled');
+          document.getElementById('playSelectedTab').classList.add('disabled');
+          document.getElementById('deleteSelectedPosition').classList.add('disabled');
+          document.getElementById('button-save-name').classList.add('disabled');
+          document.getElementById('move-btn').classList.add('disabled');
+          document.getElementById('submit-btn').classList.add('disabled');
+          document.getElementById('display-btn').classList.add('disabled');
 
           const activeTab = document.querySelector('.tab-pane.active');
+
           if (!activeTab) return;
           const activeTabId = activeTab.id.replace('tab', '');
           for (const position of data[activeTabId]) {
@@ -593,37 +729,85 @@
               return;
             }
           }
-          for (const position of data[activeTabId]) {
-            
-            let delay = document.getElementById(`${position.position_id}IF`).value
-            console.log(delay)
-            const send = {
-              "base": position.base,
-              "shoulder": position.shoulder,
-              "elbow": position.elbow,
-              "wrist": position.wrist,
-              "wrist_rot": position.wrist_rot,
-              "gripper": position.gripper,
-              "delay": delay
-            };
-            const response = await fetch('/play', {
-              method: 'POST',
-              body: JSON.stringify(send),
-              headers: {
-                'Content-Type': 'application/json'
+
+          async function pauseExecution(position_id) {
+            return new Promise(resolve => {
+              function checkPause() {
+                if (pause) {
+                  document.getElementById(`${position_id}`).classList.add("list-group-item-warning")
+                  setTimeout(checkPause, 100);
+                } else {
+                  document.getElementById(`${position_id}`).classList.remove("list-group-item-warning")
+                  resolve();
+                }
               }
+              checkPause();
             });
-            const data = await response.json();
-              setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
-              document.getElementById("base").value = data.base;
-              document.getElementById("shoulder").value = (data.shoulder + 24);
-              document.getElementById("elbow").value = (data.elbow + 121);
-              document.getElementById("wrist").value = (data.wrist + 115);
-              document.getElementById("wrist_rot").value = data.wrist_rot;
-              document.getElementById("gripper").value = data.gripper;
           }
+          do{
+            for (const position of data[activeTabId]) {
+              
+              let delay = document.getElementById(`${position.position_id}IF`).value
+              const current = document.getElementById(`${position.position_id}`)
+              current.classList.add("list-group-item-success")
+              console.log(current)
+
+              const send = {
+                "base": position.base,
+                "shoulder": position.shoulder,
+                "elbow": position.elbow,
+                "wrist": position.wrist,
+                "wrist_rot": position.wrist_rot,
+                "gripper": position.gripper,
+                "delay": delay,
+                "speed": document.getElementById("speed_input").value
+                // LINE MOVEMENT TODO
+              };
+              const response = await fetch('/play', {
+                method: 'POST',
+                body: JSON.stringify(send),
+                headers: {
+                  'Content-Type': 'application/json'
+                }
+              });
+              
+              const data = await response.json();
+                current.classList.remove("list-group-item-success")
+                setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
+                document.getElementById("base").value = data.base;
+                document.getElementById("shoulder").value = (data.shoulder + 24);
+                document.getElementById("elbow").value = (data.elbow + 121);
+                document.getElementById("wrist").value = (data.wrist + 115);
+                document.getElementById("wrist_rot").value = data.wrist_rot;
+                document.getElementById("gripper").value = data.gripper;
+
+              if (stopped) {
+                break;
+              }
+
+              if (pause) {
+                await pauseExecution(position.position_id);
+              }
+            }
+            if (stopped) {
+                stopped = false; // Reset stopped flag
+                break;
+              }
+          }while(automate)
+          document.getElementById('pauseButton').classList.add('disabled');
+          document.getElementById('continueButton').classList.add('disabled')
+          document.getElementById('addNewTabBtn').classList.remove('disabled');
+          document.getElementById('addPositionToActiveTabBtn').classList.remove('disabled');
+          document.getElementById('deleteActiveTabBtn').classList.remove('disabled');
+          document.getElementById('playSelectedTab').classList.remove('disabled');
+          document.getElementById('deleteSelectedPosition').classList.remove('disabled');
+          document.getElementById('button-save-name').classList.remove('disabled');
+          document.getElementById('pauseButton').classList.add('disabled');
+          document.getElementById('stopButton').classList.add('disabled');
+          document.getElementById('move-btn').classList.remove('disabled');
+          document.getElementById('submit-btn').classList.remove('disabled');
+          document.getElementById('display-btn').classList.remove('disabled');
         }
-        
 
         // Add event listeners for the buttons
         document.getElementById('addNewTabBtn').addEventListener('click', showPopUp);
