@@ -38,8 +38,8 @@ def website():
 @website_api.route('/move',  methods=["GET", "POST"])
 def move():
     data = request.get_json()  # parse JSON data from request body
-    print(data)
-    if 'line' in data:
+    print("data before fnc ", data)
+    if 'x' in data:
         if data['line']:
             if not servoto_coordinates_line(float(data['x']), float(data['y']), float(data['z']), float(data['speed'])):
                 return jsonify("Selected coordinates are out of reach")

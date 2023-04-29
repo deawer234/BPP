@@ -25,9 +25,7 @@ def forward_kinematics(theta0, theta1, theta2, theta3, L1=120, L2=88, L3=180):
     x, y, z = T[:3, 3]
 
     return np.array([x, y, z])
-theta0, theta1, theta2, theta3 = np.radians(33.690067525979785), np.radians(57.29254203057487), np.radians(-13.039132732887024), np.radians(-109.25340929768785)
-position = forward_kinematics(theta0, theta1, theta2, theta3)
-print(f"End effector position: {position}")
+
 
 
 

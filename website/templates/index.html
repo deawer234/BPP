@@ -816,6 +816,122 @@
         document.getElementById('playSelectedTab').addEventListener('click', sendRequests);
         document.getElementById('deleteSelectedPosition').addEventListener('click', deletePosition)
         document.getElementById('button-save-name').addEventListener('click', addNewTab)
+
+
+        function moveArm(data) {
+          $.ajax({
+            type: "POST",
+            url: "/move",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function(response) {
+              console.log(response);
+            
+              if(typeof response === 'string')
+                appendToEventLog(response);
+              else{
+                appendToEventLog("Arm in place")
+                setArmRotation(response.base, response.shoulder, response.elbow, response.wrist, response.wrist_rot);
+                document.getElementById("base").value = response.base;
+                document.getElementById("shoulder").value = (response.shoulder + 24);
+                document.getElementById("elbow").value = (response.elbow + 121);
+                document.getElementById("wrist").value = (response.wrist + 115);
+                document.getElementById("wrist_rot").value = response.wrist_rot;
+                document.getElementById("gripper").value = response.gripper;
+              }
+            }
+          });
+        }
+
+        $(document).ready(function() {
+          $("#submit-btn").off('click').click(function() {
+            const z = parseFloat($("#z").val()) + 144
+            let line = false;
+            if ($('#movementSwitch').is(':checked')) {
+                line = true
+            } 
+            var data = {
+              'x': $("#x").val(),
+              'y': $("#y").val(),
+              'z': $("#z").val(),
+              'line': line,
+              'speed': document.getElementById("speed_input").value
+            };
+            console.log("kokot")
+            appendToEventLog("Moving to the coordinates...")
+            moveArm(data);
+          });
+
+          $('#move-btn').off('click').click(function() {
+            var data = {
+              'base': $('#base').val(),
+              'shoulder': $('#shoulder').val() - 24,
+              'elbow': $('#elbow').val() - 121,
+              'wrist': $('#wrist').val() - 115,
+              'wrist_rot': $('#wrist_rot').val(),
+              'gripper': $('#gripper').val(),
+              'speed': document.getElementById("speed_input").value
+            };
+            appendToEventLog("Moving to new angles...")
+            moveArm(data);
+          });
+
+          $('input[type=number]').on('input', function() {
+
+            var data = {
+              'base': $('#base').val(),
+              'shoulder': $('#shoulder').val() - 24,
+              'elbow': $('#elbow').val() - 121,
+              'wrist': $('#wrist').val() - 115,
+              'wrist_rot': $('#wrist_rot').val(),
+              'gripper': $('#gripper').val()
+            };
+            setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
+
+          });
+
+          
+          $('input[type=range]').on('input', function() {
+
+            var data = {
+              'base': $('#base').val(),
+              'shoulder': $('#shoulder').val() - 24,
+              'elbow': $('#elbow').val() - 121,
+              'wrist': $('#wrist').val() - 115,
+              'wrist_rot': $('#wrist_rot').val(),
+              'gripper': $('#gripper').val(),
+              'speed': document.getElementById("speed_input").value
+            };
+            setArmRotation(data.base, data.shoulder, data.elbow, data.wrist, data.wrist_rot);
+
+          });
+
+          $('#display-btn').click(function() {
+            const z = parseFloat($("#z").val()) + 144
+            var data = {
+              "x": $("#x").val(),
+              "y": $("#y").val(),
+              "z": $("#z").val(),
+              'speed': document.getElementById("speed_input").value
+            };
+            appendToEventLog("Displaying selected coordinates position...")
+            $.ajax({
+              type: "POST",
+              url: "/display",
+              contentType: "application/json",
+              data: JSON.stringify(data),
+              success: function(response) {
+                console.log(response);
+                if(response == null)
+                  appendToEventLog("The position is unreachable");
+                else{
+                  setArmRotation(response.base, response.shoulder, response.elbow, response.wrist, response.wrist_rot);
+                }
+              }
+            });
+
+          });
+        });
     </script>
     </body>
 </html>
