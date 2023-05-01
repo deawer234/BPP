@@ -3,18 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
-    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <title>Robot Arm Control</title>
+    <!-- <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> -->
     <script src="../static/node_modules/jquery/dist/jquery.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/js/bootstrap-switch.js"></script>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js" data-turbolinks-track="true"></script>
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
-        rel="stylesheet" type="text/css" />
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js" data-turbolinks-track="true"></script> -->
+    <!-- <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
+        rel="stylesheet" type="text/css" /> -->
     <link href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/css/bootstrap3/bootstrap-switch.css"
         rel="stylesheet" type="text/css" />
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <!-- <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script> -->
 
     <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.css">
     
@@ -28,24 +28,74 @@
     .tab-content{
         height: 300px;
         max-height: 300px;
-        overflow:auto;
+        overflow-y: auto;
+        border: 1px solid #6D6D6D;
+        border-radius: 5px;
+        background-color: white;
+    }
+    h1{
+      text-align: center;
+      padding-bottom: 50px;
+      margin: 0;
+      padding-top: 20px;
+      background-color: lightsteelblue;
     }
     .container{
+       background-color: azure;
         height: 100%;
     }
     #top-side{
         max-height: 50%;
         margin-bottom: 50px;
     }
+    #bot-side{
+      max-height: 50%;
+      margin-bottom: 50px;
+  }
+  #sliders{
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+    #table{
+      margin-bottom: 20px;
+      margin-top: 20px;
+    }
+    #table .row .form-control{
+      border: 0;
+      height: 100%;
+    }
+    #tableHeader{
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    #table .list-group-item{
+      border-right: 0;
+      border-bottom: 0;
+    }
+    .col-log{
+      min-width: 0;
+    }
 
     #model {
       height: 430px;
     }
 
-  #viewer {
-    width: 100%; 
-     height: 100%;
-  }
+    #viewer {
+      overflow: auto;
+      width: 100%; 
+      height: 100%;
+    } 
+    .nav-tabs a{
+      color: black;
+      background-color: lightsteelblue;
+      margin-bottom: 0.5px;
+    }
+    #tabsPan{
+      padding: 0;
+    }
+    .tab-pane{
+      background-color: white;
+    }
     .form-inline .form-control{
       width: 50%;
       align-content: center;
@@ -56,17 +106,36 @@
     }
 
     .card-body .list-group{
-      max-height: 40vh;
+      height: 300px;
       overflow: auto;
     }
+    .list-group .cols-xs-2{
+      border-left: 1px;
+    }
 
-    .tab-pane{
-      border: 1px;
+    #delayText{
+      color: black;
+      margin: auto;
+      padding: 10px 15px;
+      text-align: center;
+      background-color: lightsteelblue;
+      border-radius: 5px 5px 0 0;
+      border: 1px solid #ddd;
+      
+    }
+    #delayNode{
+      
+    }
+    .btn-group{
+      margin-top: 5px;
+    }
+    .form-switch{
+      margin-top: 5px;
     }
   </style>
   <body>
     
-    <h1>Robotic Arm Control</h1>
+    <h1>Robotic Arm Control App</h1>
     <div class="container bg-light">
         <div class="row" id="top-side">
             <div class="col-md-4" id="sliders">
@@ -138,40 +207,51 @@
                       </div>
                     </div>
                   </form>
-                  <input type="submit" value="Move" class="btn btn-primary" id="move-btn">
-
-                  <label for="speed">Speed</label>
-                  <input type="range" min="2" max="8" step="1" name="speed" id="speed" value="4" class="form-control-range">
-                  <input type="number" id="speed_input" class="form-control input-sm" value="1" readonly>
+                  <div class="form-group row">
+                    <div class="col-md-3 col-sm-3 col-xs-3 col-lg">
+                    <input type="button" value="Move" class="btn btn-primary" id="move-btn">
+                  </div>
+                  <div class="col-md-9 col-sm-9 col-xs-9 col-lg">
+                    <label for="speed">Speed</label>
+                    <input type="range" min="2" max="8" step="1" name="speed" id="speed" value="4" class="form-control-range">
+                    <input type="number" id="speed_input" class="form-control input-sm" value="1" readonly>
+                  </div>
+                </div>
             </div>
 
             <div class="col-md-8" id="table">
-              <ul class="nav nav-tabs" role="tablist" id="tabList">
-                  <!-- Tab headers will be created dynamically here -->
-                </ul>
-                
+              <div class="row" id="tableHeader">
+                <div class="col-md-10 col-xs-8 col-lg" id="tabsPan">
+                <ul class="nav nav-tabs" role="tablist" id="tabList">
+                    <!-- Tab headers will be created dynamically here -->
+                  </ul>
+                </div>
+                <div class="col-md-2 col-sm-3 col-xs-3 col-lg" id="delayNode"><p id="delayText">Delay(ms)</p></div>
+                  
+              </div>
               <div class="tab-content border border-dark" id="tabContent">
                   <!-- Tab content will be created dynamically here -->
                 </div>
               
                   
-                <div class="btn-group">
+                <div class="btn-group" id="buttonsTable">
                   <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
                   <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
                   <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
                   <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
                   <button class="btn btn-success" id="playSelectedTab">Play Task</button>
               </div>
-              <div class="btn-group">
+              <div class="btn-group" id="buttonsPlay">
                 <button id="pauseButton" class="btn btn-warning disabled">Pause</button>
                 <button id="continueButton" class="btn btn-primary disabled">Resume</button>
                 <button id="stopButton" class="btn btn-danger disabled">Stop</button>
-    
+
               </div>
               <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" role="switch" id="automate">
                 <label class="form-check-label" for="automate">Automate task</label>
               </div>
+
     
           </div>
     
@@ -320,12 +400,12 @@
         const inputWrist = document.getElementById("wrist_input");
 
 
-        $('#wrist').on("input", "change", function(){
-          $('#wrist_input').value = $('#wrist').val();
+        $('#wrist').on("change", function(){
+          $('#wrist_input').val($('#wrist').val());
         });
 
-        $('#wrist_input').on("input", "change", function() {
-          $('#wrist').value = $('#wrist_input').val();
+        $('#wrist_input').on("change", function() {
+          $('#wrist').val($('#wrist_input').val());
         });
 
         const sliderWristrot= document.getElementById("wrist_rot");
@@ -432,9 +512,9 @@
               row.classList.add('row');
 
               const colItem = document.createElement('div');
-              colItem.classList.add('col-md-10');
+              colItem.classList.add('col-xs-10');
               const colInput = document.createElement('div');
-              colInput.classList.add('col-md-2');
+              colInput.classList.add('col-xs-2');
 
               const listItem = document.createElement('li');
               listItem.classList.add('list-group-item');
@@ -556,9 +636,9 @@
           row.classList.add('row');
 
           const colItem = document.createElement('div');
-          colItem.classList.add('col-md-10');
+          colItem.classList.add('col-xs-10');
           const colInput = document.createElement('div');
-          colInput.classList.add('col-md-2');
+          colInput.classList.add('col-xs-2');
 
 
           const inputField = document.createElement('input');

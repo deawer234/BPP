@@ -46,8 +46,6 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps):
 
     x_max = abs(end_angle - start_angle)
 
-    # Generate an array with equal steps between start_angle and end_angle
-
     x_values = np.linspace(int(start_angle), int(end_angle), int(num_steps))
 
     mapped_positions = []
@@ -59,7 +57,7 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps):
     
     for position in mapped_positions:
         #pi.set_servo_pulsewidth(servo_pin, angle_to_pulsewidth(position))
-        time.sleep(0.02)  # Wait for the servo to move to the new position with the adjusted delay
+        time.sleep(0.02) 
 
     return
 
@@ -83,7 +81,6 @@ def move_servo(data):
         num_samples = num_samples / setSpeed
     for part in parts:
         x = threading.Thread(target=sine_smooth_servo, args=(pins[part], angles[part], int(data[part]), num_samples))
-        #sine_smooth_servo(pins[part], angles[part], int(data[part]))
         threads.append(x)
         x.start()
         angles[part] = int(data[part])
