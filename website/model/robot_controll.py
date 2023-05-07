@@ -3,8 +3,8 @@ import time
 import pigpio
 import threading
 import numpy as np
-from website.calcs.inverse_kinematics import inverse_kinematics
-from website.calcs.forward_kinematics import forward_kinematics
+from website.calcs.kinematics import inverse_kinematics
+from website.calcs.kinematics import forward_kinematics
 
 
 pins = {'base': 17, 'shoulder': 12, 'elbow': 27, 'wrist': 22, 'wrist_rot': 23, 'gripper': 24}
@@ -24,13 +24,6 @@ def init_motors():
     #     pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(90))
     return
 
-def normalize_angle(angle):
-    while angle > 180:
-        angle -= 360
-    while angle < -180:
-        angle += 360
-    return angle
-
 def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps):
     if servo_pin == pins['shoulder']:
         start_angle = start_angle + 24
@@ -41,8 +34,8 @@ def sine_smooth_servo(servo_pin, start_angle, end_angle, num_steps):
         start_angle = 180 - start_angle
         end_angle = 180 - end_angle
     elif servo_pin == pins['wrist']:
-        start_angle = normalize_angle(start_angle + 115)
-        end_angle = normalize_angle(end_angle + 115)
+        start_angle = start_angle + 115
+        end_angle = end_angle + 115
 
     x_max = abs(end_angle - start_angle)
 
@@ -154,12 +147,12 @@ def lol(servo, angl):
         #     sine_smooth_servo(pins[servo], angl[i-1][servo], angl[i][servo], int(np.abs(angl[i][servo] - angl[i-1][servo])));
         #     continue
         if servo == 'shoulder':
-            angl[i][servo] = normalize_angle(angl[i][servo] + 24)
+            angl[i][servo] = angl[i][servo] + 24
         elif servo == 'elbow':
-            angl[i][servo] =  normalize_angle(angl[i][servo]  + 121)
-            #angl[i][servo] = 180 - angl[i][servo] 
+            angl[i][servo] =  angl[i][servo]  + 121
+            angl[i][servo] = 180 - angl[i][servo] 
         elif servo =='wrist':
-            angl[i][servo] = normalize_angle(angl[i][servo]  + 115)
+            angl[i][servo] = angl[i][servo]  + 115
         
         
         #pi.set_servo_pulsewidth(pins[servo], angle_to_pulsewidth(angl[i][servo]))

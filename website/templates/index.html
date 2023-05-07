@@ -4,135 +4,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Robot Arm Control</title>
-    <!-- <script src="//code.jquery.com/jquery-1.11.0.min.js"></script> -->
+    <script type="importmap">
+      {
+          "imports": {
+              "three": "../static/node_modules/three/build/three.module.js",
+              "OrbitControls": "../static/node_modules/three/examples/jsm/controls/OrbitControls.js",
+              "STLLoader": "../static/node_modules/three/examples/jsm/loaders/STLLoader.js"
+          }
+      }
+    </script>
     <script src="../static/node_modules/jquery/dist/jquery.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/js/bootstrap-switch.js"></script>
-    
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.js" data-turbolinks-track="true"></script> -->
-    <!-- <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
-        rel="stylesheet" type="text/css" /> -->
-    <link href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.0.1/css/bootstrap3/bootstrap-switch.css"
+    <script src="../static/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../static/node_modules/bootstrap-switch/dist/js/bootstrap-switch.js"></script>
+    <link href="../static/node_modules/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css"
         rel="stylesheet" type="text/css" />
-    <!-- <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script> -->
-
     <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.css">
-    
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script type="module" src="../static/animation.js"></script>
+
+
   </head>
-  <style>
-    .list-group-item:first-child{
-        border-radius: 0;
-    }
-    .tab-content{
-        height: 300px;
-        max-height: 300px;
-        overflow-y: auto;
-        border: 1px solid #6D6D6D;
-        border-radius: 5px;
-        background-color: white;
-    }
-    h1{
-      text-align: center;
-      padding-bottom: 50px;
-      margin: 0;
-      padding-top: 20px;
-      background-color: lightsteelblue;
-    }
-    .container{
-       background-color: azure;
-        height: 100%;
-    }
-    #top-side{
-        max-height: 50%;
-        margin-bottom: 50px;
-    }
-    #bot-side{
-      max-height: 50%;
-      margin-bottom: 50px;
-  }
-  #sliders{
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
-    #table{
-      margin-bottom: 20px;
-      margin-top: 20px;
-    }
-    #table .row .form-control{
-      border: 0;
-      height: 100%;
-    }
-    #tableHeader{
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-    #table .list-group-item{
-      border-right: 0;
-      border-bottom: 0;
-    }
-    .col-log{
-      min-width: 0;
-    }
-
-    #model {
-      height: 430px;
-    }
-
-    #viewer {
-      overflow: auto;
-      width: 100%; 
-      height: 100%;
-    } 
-    .nav-tabs a{
-      color: black;
-      background-color: lightsteelblue;
-      margin-bottom: 0.5px;
-    }
-    #tabsPan{
-      padding: 0;
-    }
-    .tab-pane{
-      background-color: white;
-    }
-    .form-inline .form-control{
-      width: 50%;
-      align-content: center;
-    }
-
-    .hover-overlay{
-      background: hsla(195, 83%, 58%, 0.3);
-    }
-
-    .card-body .list-group{
-      height: 300px;
-      overflow: auto;
-    }
-    .list-group .cols-xs-2{
-      border-left: 1px;
-    }
-
-    #delayText{
-      color: black;
-      margin: auto;
-      padding: 10px 15px;
-      text-align: center;
-      background-color: lightsteelblue;
-      border-radius: 5px 5px 0 0;
-      border: 1px solid #ddd;
-      
-    }
-    #delayNode{
-      
-    }
-    .btn-group{
-      margin-top: 5px;
-    }
-    .form-switch{
-      margin-top: 5px;
-    }
-  </style>
+  <link rel="stylesheet" href="../static/style.css" type="text/css"/>
   <body>
     
     <h1>Robotic Arm Control App</h1>
@@ -236,7 +128,7 @@
                   
                 <div class="btn-group" id="buttonsTable">
                   <button class="btn btn-primary" id="addNewTabBtn">Add New Tab</button>
-                  <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Position</button>
+                  <button class="btn btn-primary" id="addPositionToActiveTabBtn">Add Current Position</button>
                   <button class="btn btn-danger" id="deleteActiveTabBtn">Delete Tab</button>
                   <button class="btn btn-danger disabled" id="deleteSelectedPosition">Delete Position</button>
                   <button class="btn btn-success" id="playSelectedTab">Play Task</button>
@@ -293,7 +185,6 @@
           </div>
 
           <div class="col-md-4" id="events">
-            <span class="border-0">
               <div class="card">
                 <div class="card-header">
                   Event Log
@@ -302,7 +193,6 @@
                     <ul class="list-group list-group-flush" id="event-log"></ul>
                   </div>
               </div>
-            </span>
         </div>
 
 
@@ -334,8 +224,7 @@
       
      <div> -->
 
-      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuidv4.min.js"></script>
+      <script src="../static/node_modules/uuid/uuidv4/node_modules/uuid/dist/umd/uuidv4.min.js"></script>
     <script type="module">
       
         $(document).ready(function () {

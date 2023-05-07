@@ -1,0 +1,112 @@
+.list-group-item:first-child{
+    border-radius: 0;
+}
+.tab-content{
+    height: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #6D6D6D;
+    border-radius: 5px;
+    background-color: white;
+}
+h1{
+  text-align: center;
+  padding-bottom: 50px;
+  margin: 0;
+  padding-top: 20px;
+  background-color: lightsteelblue;
+}
+.container{
+   background-color: rgb(200, 214, 219);
+    height: 100%;
+}
+#top-side{
+    max-height: 50%;
+    margin-bottom: 50px;
+}
+#bot-side{
+  max-height: 50%;
+  margin-bottom: 50px;
+}
+#sliders{
+margin-top: 20px;
+margin-bottom: 20px;
+}
+#table{
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+#table .row .form-control{
+  border: 0;
+  height: 100%;
+}
+#tableHeader{
+  padding-left: 15px;
+  padding-right: 15px;
+}
+#table .list-group-item{
+  border-right: 0;
+  border-bottom: 0;
+}
+.col-log{
+  min-width: 0;
+}
+
+#model {
+  height: 430px;
+}
+
+#viewer {
+  overflow: auto;
+  width: 100%; 
+  height: 100%;
+  border: 4px solid #6D6D6D;
+  border-radius: 5px;
+} 
+.nav-tabs a{
+  color: black;
+  background-color: lightsteelblue;
+  margin-bottom: 0.5px;
+}
+#tabsPan{
+  padding: 0;
+}
+.tab-pane{
+  background-color: white;
+}
+.form-inline .form-control{
+  width: 50%;
+  align-content: center;
+}
+
+.hover-overlay{
+  background: hsla(195, 83%, 58%, 0.3);
+}
+
+.card-body .list-group{
+  height: 300px;
+  overflow: auto;
+  border: 1px solid #6D6D6D;
+  border-radius: 5px;
+}
+.list-group .cols-xs-2{
+  border-left: 1px;
+}
+
+#delayText{
+  color: black;
+  margin: auto;
+  padding: 10px 15px;
+  text-align: center;
+  background-color: lightsteelblue;
+  border-radius: 5px 5px 0 0;
+  border: 1px solid black;
+  
+}
+
+.btn-group{
+  margin-top: 5px;
+}
+.form-switch{
+  margin-top: 5px;
+}

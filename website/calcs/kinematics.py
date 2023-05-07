@@ -1,13 +1,11 @@
 import numpy as np
-from scipy.optimize import minimize
-from website.calcs.forward_kinematics import forward_kinematics
-
+from math import sin, cos
 
 def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
     r1 = np.sqrt(x**2 + y**2)
-    # Calculate the base angle
+
     base_angle = np.degrees(np.arctan2(y, x))
-    #print(base_angle)
+
     if base_angle < 0 or base_angle > 180:
         return None
     
@@ -44,14 +42,14 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
 
             wrist_angle = angle - elbow_angle - shoulder_angle
 
-            #print(str(wrist_angle) +"  " + str(wrist_angle - 360))
             if wrist_angle >= 245:
                 wrist_angle = wrist_angle - 360
 
             if wrist_angle < -115 or wrist_angle > 65:
                 continue
-            #print(angles)
+
             solutions.append({'base': float(base_angle), 'shoulder': float(shoulder_angle),'elbow': float(elbow_angle),'wrist': float(wrist_angle), 'wrist_rot': angles['wrist_rot'], 'gripper': angles['gripper']})
+        
         if solutions:
             break
     total_default = 0
@@ -65,9 +63,57 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
             if diff < min_diff:
                 min_diff = diff
                 best_solution = solution
-        print(best_solution)
         return best_solution
-    
     else:
         return None
+    
+def dh_transform(a, alpha, d, theta):
+    return np.array([
+        [np.cos(theta), -np.sin(theta) * np.cos(alpha), np.sin(theta) * np.sin(alpha), a * np.cos(theta)],
+        [np.sin(theta), np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), a * np.sin(theta)],
+        [0, np.sin(alpha), np.cos(alpha), d],
+        [0, 0, 0, 1]
+    ])
 
+# multiply two matrices
+def matrix_multiply(a, b):
+    # get dimensions of matrices
+    a_rows = len(a)
+    a_cols = len(a[0])
+    b_cols = len(b[0])
+
+    # create result matrix filled with zeros
+    result = [[0 for j in range(b_cols)] for i in range(a_rows)]
+
+    # iterate over rows of first matrix
+    for i in range(a_rows):
+        # iterate over columns of second matrix
+        for j in range(b_cols):
+            # iterate over columns of first matrix
+            for k in range(a_cols):
+                result[i][j] += a[i][k] * b[k][j]
+
+    return result
+
+def forward_kinematics(theta0, theta1, theta2, theta3, L1=120, L2=88, L3=180):
+    theta0 = np.radians(theta0)
+    theta1 = np.radians(theta1)
+    theta2 = np.radians(theta2)
+    theta3 = np.radians(theta3)
+
+    dh_params = [
+        [0, np.pi/2, 0, theta0],
+        [L1, 0, 0, theta1],
+        [L2, 0, 0, theta2],
+        [L3, 0, 0, theta3]
+    ]
+
+    transforms = [dh_transform(*params) for params in dh_params]
+
+    T = np.identity(4)
+    for transform in transforms:
+        T = T @ transform
+
+    x, y, z = np.round(T[:3, 3])
+
+    return np.array([x, y, z])

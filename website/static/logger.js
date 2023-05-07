@@ -65,7 +65,7 @@ export function appendToEventLog(message) {
     const filteredEventArray = eventLogCookie.filter(entry => !isEntryExpired(entry));
     removeExpiredEntries(filteredEventArray);
 
-    document.cookie = `array=${encodeURIComponent(JSON.stringify(eventLogCookie))}; expires=Tue, 18 Apr 2023 00:30:00 UTC; path=/`;
+    document.cookie = `array=${encodeURIComponent(JSON.stringify(eventLogCookie))}; expires=${expirationDate.toUTCString()}; path=/`;
     // Scroll to the bottom of the eventLog element
     eventLog.scrollTop = eventLog.scrollHeight;
 }

@@ -1,9 +1,9 @@
 
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js';
-import { OrbitControls } from "https://unpkg.com/three@0.112/examples/jsm/controls/OrbitControls.js";
-import { appendToEventLog }from "./logger.js";
-import { SimplifyModifier } from 'https://unpkg.com/three@0.112/examples/jsm/modifiers/SimplifyModifier.js';
-import { STLLoader } from 'https://unpkg.com/three@0.112/examples/jsm/loaders/STLLoader.js';
+//import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js';
+import * as THREE from 'three';
+import { OrbitControls } from "OrbitControls";
+import { STLLoader } from 'STLLoader';
+
 
 const viewer = document.getElementById('viewer');
 const scene = new THREE.Scene();
@@ -21,9 +21,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 camera.position.set(300, 300, 450);
 camera.lookAt(scene.position);
 
-
-// Create and add Z-axis grid (blue)
-const zAxisGrid = new THREE.GridHelper(1000,10, 0xffffff, 0xffffff);
+const zAxisGrid = new THREE.GridHelper(1000,10, 0xffffff, 0xee9090);
 zAxisGrid.position.set(0, 0, 0);
 scene.add(zAxisGrid);
 
