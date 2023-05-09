@@ -1,3 +1,12 @@
+"""
+Model representing position in database.
+
+Author: Daniel Němec
+Date: 10.04.2023
+
+Python Version: 3.8.10
+"""
+
 from website.database.database import Base
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy import Column, Integer, String

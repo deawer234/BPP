@@ -1,10 +1,17 @@
-from flask import render_template, Blueprint, request, jsonify, redirect, Response, stream_with_context
+"""
+Main blueprint of the web application.
+
+Author: Daniel Němec
+Date: 15.03.2023
+
+Python Version: 3.8.10
+"""
+
+from flask import render_template, Blueprint, request, jsonify
 from website.model.repositories import *
 from website.model.robot_controll import *
 from website.model.repositories import *
-import pigpio
 import time
-import pigpio
 
 # Set the servo pin to output mode
 website_api = Blueprint('index', __name__)
@@ -38,7 +45,6 @@ def website():
 @website_api.route('/move',  methods=["GET", "POST"])
 def move():
     data = request.get_json()  # parse JSON data from request body
-    print("data before fnc ", data)
     if 'x' in data:
         if data['line']:
             if not servoto_coordinates_line(float(data['x']), float(data['y']), float(data['z']), float(data['speed'])):
@@ -61,7 +67,6 @@ def add_pos():
 @website_api.route('/add_tab', methods=["GET", "POST"])
 def add_tabs():
     data = request.get_json()
-    print(data)
     add_tab(data['movement_id'], data['name'])
     response = {'status': 'success', 'message': 'Operation completed successfully.'}
     return jsonify(response), 200
@@ -69,7 +74,6 @@ def add_tabs():
 @website_api.route('/remove_tab', methods=["GET", "POST"])
 def rem_tab():
     data = request.get_json()
-    print(data)
     remove_tab(data)
     response = {'status': 'success', 'message': 'Operation completed successfully.'}
     return jsonify(response), 200
@@ -77,7 +81,6 @@ def rem_tab():
 @website_api.route('/remove_pos', methods=["GET", "POST"])
 def remove_pos():
     data = request.get_json()
-    print(data)
     print(get_position(str(data)))
     remove_position(data)
     response = {'status': 'success', 'message': 'Operation completed successfully.'}

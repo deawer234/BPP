@@ -1,3 +1,12 @@
+"""
+Module for establishing communication with the database
+
+Author: Daniel Němec
+Date: 01.04.2023
+
+Python Version: 3.8.10
+"""
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,19 +28,11 @@ with engine.connect() as session:
             if sql_statement.strip() != '':
                 sql_expression = text(sql_statement)
                 session.execute(sql_expression)
-# Execute the SQL statement
 
 session = scoped_session(sessionmaker(autocommit=False,
                                         autoflush=False,
                                         bind=engine))
 
-
-# session.execute(text('''INSERT INTO Movement (name) VALUES('tab1') '''))
-# session.execute(text(''' INSERT INTO Movement (name) VALUES('tab2') '''))
-
-# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(1, 45, 125, 50, 50, 50, 50)'''))
-# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 86, 40, 50, 50, 50, 50)'''))
-# session.execute(text('''INSERT INTO Position (movement_id, base, shoulder, elbow, wrist, wrist_rot, gripper) VALUES(2, 12, 40, 50, 69, 50, 50)'''))
 Base = declarative_base()
 Base.query = session.query_property()
 

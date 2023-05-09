@@ -1,16 +1,24 @@
-import numpy as np
-from math import sin, cos
+"""
+Module for calculation of kinematics for robotic arm.
 
+Author: Daniel Němec
+Date: 15.03.2023
+
+Python Version: 3.8.10
+"""
+
+import numpy as np
+
+# Computation of the inverse kinematics function according to the doc
 def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
     r1 = np.sqrt(x**2 + y**2)
 
     base_angle = np.degrees(np.arctan2(y, x))
-
+    # Limits of the base angle
     if base_angle < 0 or base_angle > 180:
         return None
     
     solutions = []
-    
     
     for i in range(2):
         for angle in np.arange(0, 360, 0.2):
@@ -22,13 +30,16 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
             c2 = (Wx**2 + Wy**2 - L1**2 - L2**2) / (2 * L1 * L2)
             if c2 < -1 or c2 > 1:
                 continue
+
             if i == 0:
                 s2 = np.negative(np.sqrt(1 - c2**2))
             else:
                 s2 = np.sqrt(1 - c2**2)
+
             elbow_angle_rad = np.arctan2(s2, c2)
             elbow_angle = np.degrees(elbow_angle_rad)
-                    
+
+            # Limits of the elbow angle
             if elbow_angle < -121 or elbow_angle > 59:
                 continue
 
@@ -36,12 +47,14 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
             c1 = ((L1 + L2 * np.cos(elbow_angle_rad)) * Wx + L2 * np.sin(elbow_angle_rad) * Wy) / (Wx**2 + Wy**2)
 
             shoulder_angle = np.degrees(np.arctan2(s1, c1))
-            
+
+            # Limits of the shoulder angle
             if shoulder_angle < -24 or shoulder_angle > 156:
                 continue
 
             wrist_angle = angle - elbow_angle - shoulder_angle
 
+            # Limits of the wrist angle
             if wrist_angle >= 245:
                 wrist_angle = wrist_angle - 360
 
@@ -52,8 +65,8 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
         
         if solutions:
             break
-    total_default = 0
 
+    # Choosing the best candidate from all the angles
     if solutions:
         min_diff = float('inf')
         best_solution = None
@@ -66,7 +79,8 @@ def inverse_kinematics(x, y, z, angles, L1=120, L2=88, L3=180):
         return best_solution
     else:
         return None
-    
+
+# Denavit-Hartenberg transform matrix   
 def dh_transform(a, alpha, d, theta):
     return np.array([
         [np.cos(theta), -np.sin(theta) * np.cos(alpha), np.sin(theta) * np.sin(alpha), a * np.cos(theta)],
@@ -75,26 +89,7 @@ def dh_transform(a, alpha, d, theta):
         [0, 0, 0, 1]
     ])
 
-# multiply two matrices
-def matrix_multiply(a, b):
-    # get dimensions of matrices
-    a_rows = len(a)
-    a_cols = len(a[0])
-    b_cols = len(b[0])
-
-    # create result matrix filled with zeros
-    result = [[0 for j in range(b_cols)] for i in range(a_rows)]
-
-    # iterate over rows of first matrix
-    for i in range(a_rows):
-        # iterate over columns of second matrix
-        for j in range(b_cols):
-            # iterate over columns of first matrix
-            for k in range(a_cols):
-                result[i][j] += a[i][k] * b[k][j]
-
-    return result
-
+# Computation of the forward kinematics with DH conception
 def forward_kinematics(theta0, theta1, theta2, theta3, L1=120, L2=88, L3=180):
     theta0 = np.radians(theta0)
     theta1 = np.radians(theta1)

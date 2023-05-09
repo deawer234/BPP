@@ -7,7 +7,7 @@ from website.model.robot_controll import pi
 import logging
 from logging.handlers import RotatingFileHandler
 
-os.environ["PIGPIO_ADDR"] = "192.168.0.80"
+#os.environ["PIGPIO_ADDR"] = "192.168.0.80"
 
 app = Flask(__name__)
 

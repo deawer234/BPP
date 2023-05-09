@@ -1,5 +1,14 @@
+"""
+Model representing movement in database
+
+Author: Daniel Němec
+Date: 10.04.2023
+
+Python Version: 3.8.10
+"""
+
 from website.database.database import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 class Movement(Base):

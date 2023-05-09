@@ -1,3 +1,12 @@
+"""
+Repositories for manipulation with data in database.
+
+Author: Daniel Němec
+Date: 15.03.2023
+
+Python Version: 3.8.10
+"""
+
 from website.database.database import session
 from website.model.movement_model import Movement
 from website.model.position_model import Position
